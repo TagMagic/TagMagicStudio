@@ -1,2 +1,0 @@
-# TagMagicStudio
-TagMagicStudio Metadata App
