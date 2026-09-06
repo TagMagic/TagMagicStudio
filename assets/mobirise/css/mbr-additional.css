@@ -1361,7 +1361,7 @@ a {
 }
 .cid-vrEOyxXbpw {
   padding-top: 9rem;
-  padding-bottom: 0rem;
+  padding-bottom: 4rem;
   background-color: #232323;
 }
 .cid-vrEOyxXbpw .mbr-fallback-image.disabled {
@@ -1544,8 +1544,8 @@ a {
   text-align: center;
 }
 .cid-vusrcOgtxz {
-  padding-top: 6rem;
-  padding-bottom: 6rem;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
   background-color: #232323;
 }
 .cid-vusrcOgtxz .mbr-fallback-image.disabled {
@@ -1628,6 +1628,59 @@ a {
   text-align: center;
 }
 .cid-vrXBZnJlLQ .mbr-section-subtitle {
+  color: #ffa600;
+  text-align: center;
+}
+.cid-vutvvREJ1x {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  background-color: #232323;
+}
+.cid-vutvvREJ1x .mbr-fallback-image.disabled {
+  display: none;
+}
+.cid-vutvvREJ1x .mbr-fallback-image {
+  display: block;
+  background-size: cover;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  bottom: 0;
+}
+.cid-vutvvREJ1x .topbg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: #edefeb;
+}
+.cid-vutvvREJ1x .mbr-section-title {
+  color: #ffffff;
+}
+.cid-vutvvREJ1x .mbr-text,
+.cid-vutvvREJ1x .mbr-section-btn {
+  color: #ffffff;
+}
+.cid-vutvvREJ1x .content-head {
+  max-width: 800px;
+}
+.cid-vutw3hPhpC {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-image: url("../../../assets/images/darkwoodbg.jpg");
+}
+.cid-vutw3hPhpC .mbr-section-title {
+  color: #ffa600;
+  text-align: center;
+}
+.cid-vutw3hPhpC .mbr-text,
+.cid-vutw3hPhpC .mbr-section-btn {
+  color: #05386b;
+  text-align: center;
+}
+.cid-vutw3hPhpC .mbr-section-subtitle {
   color: #ffa600;
   text-align: center;
 }
