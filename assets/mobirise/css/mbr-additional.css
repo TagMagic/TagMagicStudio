@@ -1544,8 +1544,8 @@ a {
   text-align: center;
 }
 .cid-vusrcOgtxz {
-  padding-top: 8rem;
-  padding-bottom: 8rem;
+  padding-top: 6rem;
+  padding-bottom: 6rem;
   background-color: #232323;
 }
 .cid-vusrcOgtxz .mbr-fallback-image.disabled {
@@ -1607,7 +1607,11 @@ a {
 }
 .cid-vusrcOgtxz .mbr-text,
 .cid-vusrcOgtxz .mbr-section-btn {
-  text-align: left;
+  text-align: justify;
+  color: #ffffff;
+}
+.cid-vusrcOgtxz .price {
+  color: #ffffff;
 }
 .cid-vrXBZnJlLQ {
   padding-top: 1rem;
