@@ -67,7 +67,7 @@
         "file": "@PROJECT_PATH@/fonts/Ancient-Tulip/font.ttf"
       }
     ],
-    "favicon": false,
+    "favicon": "@PROJECT_PATH@/assets/images/tagmagic-favico.png",
     "mbrsiteDomain": "radamkbjva",
     "imageResize": false,
     "usedWebp": false,
