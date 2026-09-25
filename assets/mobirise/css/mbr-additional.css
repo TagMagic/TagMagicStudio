@@ -3511,62 +3511,8 @@ a {
     padding: 1rem;
   }
 }
-.cid-vvpoFdUHnt {
-  padding-top: 9rem;
-  padding-bottom: 0rem;
-  background-color: #232323;
-}
-.cid-vvpoFdUHnt .mbr-fallback-image.disabled {
-  display: none;
-}
-.cid-vvpoFdUHnt .mbr-fallback-image {
-  display: block;
-  background-size: cover;
-  background-position: center center;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  bottom: 0;
-}
-.cid-vvpoFdUHnt .topbg {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 30%;
-  background: #edefeb;
-}
-.cid-vvpoFdUHnt .mbr-section-title {
-  color: #ffffff;
-}
-.cid-vvpoFdUHnt .mbr-text,
-.cid-vvpoFdUHnt .mbr-section-btn {
-  color: #ffffff;
-  text-align: center;
-}
-.cid-vvpoFdUHnt .content-head {
-  max-width: 800px;
-}
-.cid-vvpoFe2vLj {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  background-image: url("../../../assets/images/darkwoodbg.jpg");
-}
-.cid-vvpoFe2vLj .mbr-section-title {
-  color: #ffa600;
-  text-align: center;
-}
-.cid-vvpoFe2vLj .mbr-text,
-.cid-vvpoFe2vLj .mbr-section-btn {
-  color: #05386b;
-  text-align: center;
-}
-.cid-vvpoFe2vLj .mbr-section-subtitle {
-  color: #ffa600;
-  text-align: center;
-}
 .cid-vvpp2CMRI2 {
-  padding-top: 8rem;
+  padding-top: 10rem;
   padding-bottom: 4rem;
   background-color: #232323;
 }
