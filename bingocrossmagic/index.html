@@ -224,6 +224,12 @@ main{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
 .srow .sname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .srow b{font-family:var(--fat);font-weight:400}
 .srow.me{background:#ffe9a8;font-weight:700}
+.credit{margin:0;padding:8px 13px;border-radius:20px;font-size:14.5px;text-align:center;color:var(--ivory);
+  background:rgba(21,11,28,.88);border:1.5px solid var(--gold-dk);box-shadow:0 4px 12px rgba(0,0,0,.6)}
+.credit a{color:var(--gold2);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.credit a:hover{color:#fff}
+.billcredit{margin:10px 0 0;font-size:14px;color:var(--ink)}
+.billcredit a{color:#a0206a;font-weight:700}
 .confetti{position:fixed;top:-20px;width:11px;height:16px;z-index:30;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}}
@@ -321,7 +327,7 @@ main{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
           </g>
         </svg>
       </div>
-      <div class="plaque" aria-live="polite"><small>MISS RUBY</small><span id="say">Evening, folks. Pick a game.</span></div>
+      <div class="plaque" aria-live="polite"><small>MISS RUBY</small><span id="say">Evening, folks. Ready when you are.</span></div>
       </div>
 
       <div class="panel">
@@ -341,6 +347,7 @@ main{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
           <button class="btn alt" id="bHelp">Rules</button>
         </div>
       </div>
+      <p class="credit">BingoCrossMagic is free from <a href="https://tagmagicstudio.com/" target="_blank" rel="noopener">TagMagic Studio</a></p>
     </div>
 
     <div class="cardwrap">
@@ -371,10 +378,10 @@ main{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
     <p style="margin:-6px 0 14px;font-size:14px">Magic Cross: a 5-letter word across <i>and</i> a 5-letter word down.</p>
     <div class="scores" id="introScores" hidden></div>
     <div class="btns">
-      <button class="btn red" id="bRandom">New game</button>
-      <button class="btn" id="bDaily">Daily challenge</button>
+      <button class="btn red" id="bRandom">Start game</button>
     </div>
-    <p style="margin:12px 0 0;font-size:13.5px;color:#6b3d1e"><b>New game</b> draws different letters every time. <b>Daily challenge</b> uses the same letters all day, for everyone, so you can compare scores.</p>
+    <p style="margin:12px 0 0;font-size:13.5px;color:#6b3d1e">Every game draws different letters. Can you beat your best score?</p>
+    <p class="billcredit">BingoCrossMagic is free from <a href="https://tagmagicstudio.com/" target="_blank" rel="noopener">TagMagic Studio</a></p>
   </div>
 </div>
 
@@ -683,7 +690,7 @@ function showScores(){
   });
 }
 showScores();
-buildArt(); grid=new Array(25).fill(""); seq=[]; idx=0; buildBoard(); render(); $("now").innerHTML="<span>Pick a game to begin</span>";
+buildArt(); grid=new Array(25).fill(""); seq=[]; idx=0; buildBoard(); render(); $("now").innerHTML="<span>Press Start game to begin</span>";
 $("nameIn").addEventListener("input",()=>{
   if(!curEntry) return;
   const name=$("nameIn").value.trim().slice(0,14);
@@ -691,7 +698,6 @@ $("nameIn").addEventListener("input",()=>{
   const list=loadScores(); const e=list.find(x=>x.id===curEntry.id);
   if(e){ e.n=name||"Player"; curEntry=e; saveScores(list); showScores(); }
 });
-$("bDaily").onclick=()=>start(true);
 $("bRandom").onclick=()=>start(false);
 $("bNew").onclick=()=>{ clearTimeout(timer); hush(); $("booth").classList.remove("spin"); $("intro").hidden=false; };
 $("bHelp").onclick=()=>{ if(seq.length&&!over) say("Place each letter. Build words across and down. 3 letters = 3, 4 = 6, 5 = 12."); else $("intro").hidden=false; };
