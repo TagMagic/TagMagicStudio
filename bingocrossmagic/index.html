@@ -223,6 +223,10 @@ main{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
 .srow{display:flex;gap:8px;padding:2px 4px;font-size:15.5px;border-radius:4px}
 .srow .sname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .srow b{font-family:var(--fat);font-weight:400}
+.sclear{margin-top:6px;padding-top:6px;border-top:1px solid rgba(156,111,26,.45);text-align:center;font-size:13.5px;display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap}
+.slink{background:none;border:0;padding:2px 4px;font-size:13.5px;color:#8c1022;text-decoration:underline;text-underline-offset:2px}
+.sbtn{padding:4px 10px;border-radius:5px;border:1.5px solid var(--gold-dk);background:#fff;font-size:13.5px;font-weight:700;color:var(--ink)}
+.sbtn.yes{background:#b3263f;border-color:#6d0b1c;color:#fff}
 .srow.me{background:#ffe9a8;font-weight:700}
 .credit{margin:0;padding:8px 13px;border-radius:20px;font-size:14.5px;text-align:center;color:var(--ivory);
   background:rgba(21,11,28,.88);border:1.5px solid var(--gold-dk);box-shadow:0 4px 12px rgba(0,0,0,.6)}
@@ -673,6 +677,10 @@ function loadScores(){
   return list.filter(e=>e&&typeof e.s==="number");
 }
 function saveScores(list){ try{ localStorage.setItem("bingocrossmagic_scores",JSON.stringify(list)); }catch(e){} }
+function clearScores(){
+  try{ localStorage.removeItem("bingocrossmagic_scores"); localStorage.removeItem("bingocrossmagic_best"); }catch(e){}
+  curEntry=null; $("nameRow").hidden=true; showScores();
+}
 function lastName(){ try{ return localStorage.getItem("bingocrossmagic_name")||""; }catch(e){ return ""; } }
 function showScores(){
   const list=loadScores();
@@ -687,6 +695,18 @@ function showScores(){
       const c=document.createElement("b"); c.textContent=e.s;
       row.append(a,b,c); box.appendChild(row);
     });
+    // start over: asks once more before wiping the list
+    const foot=document.createElement("div"); foot.className="sclear";
+    const ask=document.createElement("button"); ask.type="button"; ask.className="slink"; ask.textContent="Clear high scores";
+    ask.onclick=()=>{
+      foot.innerHTML="";
+      const q=document.createElement("span"); q.textContent="Erase all high scores?";
+      const yes=document.createElement("button"); yes.type="button"; yes.className="sbtn yes"; yes.textContent="Yes, erase";
+      const no=document.createElement("button"); no.type="button"; no.className="sbtn"; no.textContent="Keep them";
+      yes.onclick=clearScores; no.onclick=showScores;
+      foot.append(q,yes,no);
+    };
+    foot.appendChild(ask); box.appendChild(foot);
   });
 }
 showScores();
