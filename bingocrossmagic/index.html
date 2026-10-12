@@ -389,6 +389,21 @@ main{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
   </div>
 </div>
 
+<div class="veil" id="rules" hidden>
+  <div class="bill">
+    <h3>How to play</h3>
+    <ol>
+      <li>Miss Ruby spins the cage and calls <b>one letter</b> at a time. There are 25 balls, one for every square.</li>
+      <li>Click any empty square on your card to place the letter. <b>Once it is down, it stays.</b></li>
+      <li>Build real words reading <b>across</b> and <b>down</b>. Each row and each column scores its longest word.</li>
+      <li>You never know which letter comes next, so leave yourself room!</li>
+    </ol>
+    <div class="pts"><span>3 letters = <b>3</b></span><span>4 letters = <b>6</b></span><span>5 letters = <b>12</b></span><span>Magic Cross = <b>+20</b></span></div>
+    <p style="margin:-6px 0 14px;font-size:14px">Magic Cross: a 5-letter word across <i>and</i> a 5-letter word down.</p>
+    <div class="btns"><button class="btn red" id="bRulesClose">Back to the game</button></div>
+  </div>
+</div>
+
 <div class="veil" id="end" hidden>
   <div class="bill">
     <h3 id="endTop">The cage is empty!</h3>
@@ -720,7 +735,10 @@ $("nameIn").addEventListener("input",()=>{
 });
 $("bRandom").onclick=()=>start(false);
 $("bNew").onclick=()=>{ clearTimeout(timer); hush(); $("booth").classList.remove("spin"); $("intro").hidden=false; };
-$("bHelp").onclick=()=>{ if(seq.length&&!over) say("Place each letter. Build words across and down. 3 letters = 3, 4 = 6, 5 = 12."); else $("intro").hidden=false; };
+$("bHelp").onclick=()=>{ $("rules").hidden=false; $("bRulesClose").focus(); };
+$("bRulesClose").onclick=()=>{ $("rules").hidden=true; };
+$("rules").addEventListener("click",e=>{ if(e.target.id==="rules") $("rules").hidden=true; });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !$("rules").hidden) $("rules").hidden=true; });
 $("bAgain").onclick=()=>{ $("end").hidden=true; $("intro").hidden=false; };
 $("bLook").onclick=()=>{ $("end").hidden=true; };
 $("bSound").onclick=()=>{ soundOn=!soundOn; $("bSound").textContent="Sound: "+(soundOn?"on":"off"); if(!soundOn) hush(); };
