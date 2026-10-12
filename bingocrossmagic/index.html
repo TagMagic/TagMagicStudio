@@ -371,10 +371,10 @@ main{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
     <p style="margin:-6px 0 14px;font-size:14px">Magic Cross: a 5-letter word across <i>and</i> a 5-letter word down.</p>
     <div class="scores" id="introScores" hidden></div>
     <div class="btns">
-      <button class="btn red" id="bDaily">Tonight's game</button>
-      <button class="btn" id="bRandom">Random game</button>
+      <button class="btn red" id="bRandom">New game</button>
+      <button class="btn" id="bDaily">Daily challenge</button>
     </div>
-    <p style="margin:12px 0 0;font-size:13.5px;color:#6b3d1e">Tonight's game gives everyone the same letters in the same order, so you can compare scores.</p>
+    <p style="margin:12px 0 0;font-size:13.5px;color:#6b3d1e"><b>New game</b> draws different letters every time. <b>Daily challenge</b> uses the same letters all day, for everyone, so you can compare scores.</p>
   </div>
 </div>
 
@@ -626,7 +626,7 @@ function finish(){
   const ranks=[[80,"Cross Magician"],[60,"Toast of the Town"],[40,"Word Wrangler"],[20,"Card Sharp"],[0,"New Member"]];
   $("rank").textContent=ranks.find(r=>total>=r[0])[1];
   $("endScore").textContent=total;
-  $("endNote").innerHTML=(s.cross?"Magic Cross bonus: <b>+"+CROSS_BONUS+"</b><br>":"")+(isBest?"<b>A new best score!</b>":(rank>=0?"<b>You made the top five!</b>":""))+(daily?"<br>Tonight's game · "+todayKey():"");
+  $("endNote").innerHTML=(s.cross?"Magic Cross bonus: <b>+"+CROSS_BONUS+"</b><br>":"")+(isBest?"<b>A new best score!</b>":(rank>=0?"<b>You made the top five!</b>":""))+(daily?"<br>Daily challenge · "+todayKey():"");
   const w=$("endWords"); w.innerHTML="";
   s.rows.forEach(b=>{ if(b) w.innerHTML+='<span style="background:#0f8f8a">'+b.word+" +"+b.pts+"</span>"; });
   s.cols.forEach(b=>{ if(b) w.innerHTML+='<span style="background:#b3263f">'+b.word+" +"+b.pts+"</span>"; });
