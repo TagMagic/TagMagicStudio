@@ -1,7 +1,7 @@
 {
   "settings": {
     "name": "TagMagic Studio",
-    "currentPage": "fun-games.html",
+    "currentPage": "index.html",
     "theme": {
       "name": "startm5",
       "title": "StartM5",
@@ -72,9 +72,9 @@
     "imageResize": false,
     "usedWebp": false,
     "robotsSwitcher": false,
-    "sitemapSwitcher": false,
-    "sitemapSwitcherAuto": false,
-    "siteUrl": false,
+    "sitemapSwitcher": true,
+    "sitemapSwitcherAuto": "on",
+    "siteUrl": "https://tagmagicstudio.com",
     "cookiesAlert": false,
     "gdpr": false,
     "uniqCompNum": 340,
