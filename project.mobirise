@@ -1,7 +1,7 @@
 {
   "settings": {
     "name": "TagMagic Studio",
-    "currentPage": "index.html",
+    "currentPage": "free-vst-plugins.html",
     "theme": {
       "name": "startm5",
       "title": "StartM5",
@@ -86,8 +86,8 @@
     "index.html": {
       "settings": {
         "main": true,
-        "title": "TagMagic Studio",
-        "meta_descr": "TagMagic Studio",
+        "title": "TagMagic: Music Tag Editor and Album Art Finder for Windows",
+        "meta_descr": "TagMagic fixes wrong music tags and missing album art. Review every change before it saves. Free 7-day trial for Windows, one-time purchase after",
         "header_custom": "",
         "footer_custom": "",
         "html_before": ""
@@ -5918,8 +5918,8 @@
     },
     "free-vst-plugins.html": {
       "settings": {
-        "title": "Free VST Plugins",
-        "meta_descr": "Free VST Plugins... VST3 & Standalone .exe for NoizeMagic (Sampler), and VST3 for NoizeMagicFX (Vocoder)",
+        "title": "Free VST3 Sampler and Vocoder Plugins + Standalone App | NoizeMagic",
+        "meta_descr": "Download NoizeMagic, a free VST3 sampler, and NoizeMagicFX, a free vocoder. Use them in your DAW or as a free standalone app from the Microsoft Store",
         "header_custom": "",
         "footer_custom": "",
         "html_before": "",
@@ -8243,8 +8243,8 @@
     },
     "mirrormagic.html": {
       "settings": {
-        "title": "MirrorMagic",
-        "meta_descr": "MirrorMagic shows your Windows PC on your tablet and lets you control it by touch over your own Wi-Fi. 7-day free trial, one-time purchase, no subscription",
+        "title": "MirrorMagic: Mirror and Control Your PC Screen on an Android Tablet",
+        "meta_descr": "MirrorMagic shows your Windows PC on your tablet and lets you control it by touch over your own Wi-Fi. 7-day free trial, one-time purchase, free updates forever",
         "header_custom": "",
         "footer_custom": "",
         "html_before": "",
@@ -11832,8 +11832,8 @@
     },
     "fun-games.html": {
       "settings": {
-        "title": "Fun & Games",
-        "meta_descr": "Free Games and Music Visualizer",
+        "title": "Free Browser Games and Music Visualizer | TagMagic Studio",
+        "meta_descr": "Play free in your browser: TargetMagic first-person target range, BingoCrossMagic word game, and DazeMagic 60s-style music visualizer. No download",
         "header_custom": "",
         "footer_custom": "",
         "html_before": "",
