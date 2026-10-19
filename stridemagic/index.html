@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="darkreader-lock">
 <title>StrideMagic</title>
 <link rel="icon" type="image/png" href="wizard.png">
 <link rel="apple-touch-icon" href="wizard.png">
@@ -11,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Limelight&family=Josefin+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
+  color-scheme:dark;
   --green:#0e3b2c; --green2:#16553f; --gold:#d8b04a; --gold2:#f3d67a;
   --burg:#7c1d2b; --cream:#f5ecd6; --ink:#1b140e; --teal:#3fc1c1; --amber:#ffc857;
   --panel:rgba(12,32,25,.92);
@@ -70,7 +73,7 @@ canvas#track{display:block;width:100%}
 .turninfo{text-align:center;font-weight:700;font-size:18px;color:var(--gold2);margin-bottom:4px;min-height:24px}
 .myrig{text-align:center;font-size:14px;opacity:.9;margin-bottom:8px}
 .dicezone{background:rgba(0,0,0,.25);border:1px solid rgba(216,176,74,.35);border-radius:8px;padding:12px 8px 30px;min-height:120px}
-.dice{display:flex;gap:14px;justify-content:center;align-items:center;min-height:72px}
+.dice{display:flex;gap:14px;justify-content:center;align-items:center;min-height:72px;margin-bottom:26px}
 .die{width:66px;height:66px;position:relative;perspective:420px;cursor:default;transition:transform .15s,opacity .15s,filter .15s}
 .die::after{content:"";position:absolute;left:8%;right:8%;bottom:-9px;height:9px;border-radius:50%;background:radial-gradient(rgba(0,0,0,.55),transparent 70%);z-index:-1}
 .die.click{cursor:pointer}
@@ -79,15 +82,15 @@ canvas#track{display:block;width:100%}
 .die.rolling .cube{animation:tumble .85s cubic-bezier(.18,.75,.32,1) both}
 @keyframes tumble{0%{transform:translateY(-26px) rotateX(var(--sx)) rotateY(var(--sy))}55%{transform:translateY(5px) rotateX(calc(var(--fx) + (var(--sx) - var(--fx))*.12)) rotateY(calc(var(--fy) + (var(--sy) - var(--fy))*.12))}75%{transform:translateY(-4px) rotateX(var(--fx)) rotateY(var(--fy))}100%{transform:translateY(0) rotateX(var(--fx)) rotateY(var(--fy))}}
 .face{position:absolute;inset:0;border-radius:11px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:11px;backface-visibility:hidden;
-  background:linear-gradient(135deg,#c9a24a 0 7px,transparent 7.5px),linear-gradient(225deg,#c9a24a 0 7px,transparent 7.5px),linear-gradient(45deg,#c9a24a 0 7px,transparent 7.5px),linear-gradient(315deg,#c9a24a 0 7px,transparent 7.5px),radial-gradient(circle at 32% 28%,#fffaf0,#f1e4c2 50%,#d6bf8a);
-  box-shadow:inset 0 0 0 2px #a8822a,inset 0 0 0 4px #f6ecd2,inset 0 0 0 5px rgba(168,130,42,.8),inset 0 -5px 9px rgba(110,80,30,.28),inset 0 3px 5px rgba(255,255,255,.7)}
+  background:linear-gradient(135deg,#c9a24a 0 7px,transparent 7.5px),linear-gradient(225deg,#c9a24a 0 7px,transparent 7.5px),linear-gradient(45deg,#c9a24a 0 7px,transparent 7.5px),linear-gradient(315deg,#c9a24a 0 7px,transparent 7.5px),radial-gradient(circle at 32% 28%,#ffffff,#fffdf6 55%,#f6efdc);
+  box-shadow:inset 0 0 0 2px #a8822a,inset 0 0 0 4px #f6ecd2,inset 0 0 0 5px rgba(168,130,42,.8),inset 0 -3px 6px rgba(150,120,60,.14),inset 0 3px 5px rgba(255,255,255,.9)}
 .f1{transform:translateZ(33px)} .f6{transform:rotateY(180deg) translateZ(33px)} .f2{transform:rotateY(90deg) translateZ(33px)}
 .f5{transform:rotateY(-90deg) translateZ(33px)} .f3{transform:rotateX(90deg) translateZ(33px)} .f4{transform:rotateX(-90deg) translateZ(33px)}
 .pip{width:11px;height:11px;border-radius:50%;place-self:center;background:radial-gradient(circle at 38% 35%,#4a362a,#120a06 70%);box-shadow:inset 0 2px 2px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.8)}
 .f1 .pip{width:19px;height:19px;background:radial-gradient(circle at 36% 32%,#ff8a8f,#c0242f 45%,#6b1019);box-shadow:0 0 0 2px #c9a24a,0 0 0 3px #6b4a10,inset 0 -2px 3px rgba(0,0,0,.4)}
 .die.stride{transform:translateY(-6px);filter:drop-shadow(0 0 6px #f3d67a) drop-shadow(0 0 2px #f3d67a)}
 .die.stam{transform:translateY(-6px);filter:drop-shadow(0 0 6px #3fc1c1) drop-shadow(0 0 2px #3fc1c1)}
-.die.toss{opacity:.4}
+.die.toss{opacity:.55}
 .die.bust .face{background:radial-gradient(circle at 32% 28%,#ffe9e9,#f2c4c4 50%,#d99a9a)}
 .die .tag{position:absolute;bottom:-27px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;letter-spacing:.08em;white-space:nowrap}
 .die.stride .tag{color:var(--gold2)} .die.stam .tag{color:var(--teal)} .die.toss .tag{color:#bbb}
