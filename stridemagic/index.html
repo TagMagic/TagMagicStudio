@@ -866,7 +866,7 @@ function programHTML(){
   if(S.bank<5){ S.bank=START_BANK; store('bank',S.bank); }
   const ml=morningLine();
   return `${stepBar('program')}
-  <div class="prehead">${logoOK?`<img class="lg" src="logo.png" alt="StrideMagic">`:`<span style="font-family:Limelight;font-size:40px;color:var(--gold2)">StrideMagic</span>`}${wizOK?`<img class="wz" src="wizard.png" alt="">`:''}</div>
+  <div class="prehead">${wizOK?`<img class="wz" src="wizard.png" alt="">`:''}${logoOK?`<img class="lg" src="logo.png" alt="StrideMagic">`:`<span style="font-family:Limelight;font-size:40px;color:var(--gold2)">StrideMagic</span>`}</div>
   <div class="program">
     <div class="progcover">
       <div class="price">25¢</div>
