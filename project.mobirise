@@ -1,7 +1,7 @@
 {
   "settings": {
     "name": "TagMagic Studio",
-    "currentPage": "free-vst-plugins.html",
+    "currentPage": "index.html",
     "theme": {
       "name": "startm5",
       "title": "StartM5",
@@ -71,7 +71,7 @@
     "mbrsiteDomain": "radamkbjva",
     "imageResize": false,
     "usedWebp": false,
-    "robotsSwitcher": false,
+    "robotsSwitcher": true,
     "sitemapSwitcher": true,
     "sitemapSwitcherAuto": "on",
     "siteUrl": "https://tagmagicstudio.com",
@@ -80,7 +80,8 @@
     "uniqCompNum": 340,
     "versionPublish": "6.1.12",
     "screenshot": "screenshot.png",
-    "google-analytics": ""
+    "google-analytics": "",
+    "robotsText": "User-agent: *\nAllow: /\n\nSitemap: https://tagmagicstudio.com/sitemap.xml"
   },
   "pages": {
     "index.html": {
