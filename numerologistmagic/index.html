@@ -196,6 +196,27 @@ footer a:hover{color:var(--gold)}
   table.months td.m{width:auto}
 }
 
+/* ---------- In-depth report pieces ---------- */
+.numgrid.small{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.numgrid.small .minival{font-family:'Cinzel',Georgia,serif;font-weight:700;font-size:22px;color:var(--wine);margin:8px 0 4px}
+.lines{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;margin:8px 0 10px;font-size:16.5px;break-inside:avoid}
+.lines.one{grid-template-columns:1fr}
+.lines b{display:block;font-family:'Cinzel',Georgia,serif;font-size:12.5px;letter-spacing:.6px;color:var(--wine);text-transform:uppercase}
+ul.plain{margin:4px 0 6px;padding-left:20px}
+ul.plain li{margin:2px 0}
+.mblock{border-bottom:1px solid #e6d2a0;padding:10px 0 8px;break-inside:avoid}
+.mblock .mt{display:flex;align-items:center;gap:10px}
+.mblock .mt .badge{width:38px;height:38px;font-size:17px;margin:0;flex:0 0 auto}
+.mblock h3{margin:0}
+.mblock p{margin:6px 0 4px}
+table.chart{border-collapse:collapse;margin:8px auto 12px;font-family:'Cinzel',Georgia,serif}
+table.chart th,table.chart td{border:1px solid var(--rule);width:44px;height:30px;text-align:center;font-size:15px}
+table.chart th{background:var(--parch2);color:var(--wine);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+table.pin td.n{width:90px}
+tr.now td{background:#f9e7b8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.twocol{margin:8px 0}
+@media (max-width:700px){ .lines{grid-template-columns:1fr} table.chart th,table.chart td{width:30px} }
+
 /* ---------- Trial bar & purchase window ---------- */
 .trialbar{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 18px;font-size:17px;color:var(--muted)}
 .trialbar b{color:var(--gold2)}
@@ -267,6 +288,7 @@ footer a:hover{color:var(--gold)}
       <div class="row" style="margin-top:10px" id="y-date"></div>
       <div class="row" style="margin-top:10px">
         <div class="field small"><label for="y-year">Report year</label><input id="y-year" type="number" min="1900" max="2200"></div>
+        <div class="field" style="flex:0 1 280px"><label for="y-day">Day-by-day guide (optional)</label><select id="y-day"><option value="-1">No daily guide</option></select></div>
       </div>
     </div>
     <div class="actions">
@@ -602,11 +624,11 @@ function nameNumber(name, mode){ // mode: all | vowels | consonants
     total+=r;
   }
   const final = total? reduce(total) : 0;
-  return {n:final, calc: steps.join(" + ") + ` = ${total}${total!==final?" → "+final:""}`};
+  return {n:final, total, calc: steps.join(" + ") + ` = ${total}${total!==final?" → "+final:""}`};
 }
 function lifePath(m,d,y){
   const rm=reduce(m), rd=reduce(d), ry=reduce(digitSum(y)); const t=rm+rd+ry; const n=reduce(t);
-  return {n, calc:`Month ${m}${m!==rm?"→"+rm:""} + Day ${d}${d!==rd?"→"+rd:""} + Year ${y}→${ry} = ${t}${t!==n?" → "+n:""}`};
+  return {n, t, calc:`Month ${m}${m!==rm?"→"+rm:""} + Day ${d}${d!==rd?"→"+rd:""} + Year ${y}→${ry} = ${t}${t!==n?" → "+n:""}`};
 }
 function birthday(d){ const n=reduce(d); return {n, calc:`Day ${d}${d!==n?" → "+n:""}`}; }
 function personalYear(m,d,Y){
@@ -676,31 +698,395 @@ function monthTable(py, Y, showTags){
 }
 function closing(){ return `<div class="closing">Numbers describe tendencies and timing, not fate. Use this reading as a guide, and let your own heart and good sense make the final call.</div>`; }
 
+/* ---------- In-depth interpretation content ---------- */
+const DEEP = {
+1:{strengths:["Courageous and self-motivated","A natural starter and innovator","Decisive under pressure","Independent and resourceful","Inspires others by example"],
+ challenges:["Impatience with slower people","Stubbornness or bossiness","Trouble asking for help","Feeling alone at the top","Starting more than they finish"],
+ career:"Ones do best where they can lead or work independently: running their own business, management, sales, inventing, design, the military, or any field that rewards initiative. They struggle in jobs with micromanagement or no room to advance.",
+ money:"Money comes through initiative. Ones earn best when they are paid for results rather than hours. The thing to watch is spending boldly on new ventures before the old ones have paid off.",
+ health:"Ones run on drive and adrenaline, so stress tends to show up as headaches, tension and burnout. Regular physical activity is the best outlet for their energy, and they need to learn to rest before they are forced to.",
+ advice:"Lead, but listen. Your ideas are strongest when you let others add to them, and the people who follow you will work twice as hard when they feel heard.",
+ comm:"Direct, confident and to the point. A 1 says what they think and expects the same in return. They can come across as abrupt without meaning to.",
+ conflict:"A 1 meets conflict head-on and wants it settled quickly. They may push to win the argument rather than understand it, but they rarely hold grudges once it is over.",
+ ideal:"someone confident and independent who admires their drive, won't try to control them, and has a life and goals of their own",
+ tip:"Be direct and get to the point, give them room to lead, and praise their ideas before suggesting changes."},
+2:{strengths:["Diplomatic and tactful","Deeply intuitive about people","Patient and supportive","Careful with details","A natural partner and team player"],
+ challenges:["Oversensitivity to criticism","Avoiding conflict until it boils over","Indecision","Putting others first at their own cost","Self-doubt"],
+ career:"Twos shine as the right hand, the mediator, the one who makes the whole team work. Counseling, mediation, human resources, nursing, teaching, administration, music and any partnership-based work suit them well.",
+ money:"Twos are usually careful with money and like the security of savings. They do well in partnerships, and many of their best financial opportunities come through other people.",
+ health:"Twos absorb the moods of the people around them, so stress often lands in the stomach and nerves. Peaceful surroundings, music and time with loved ones restore them.",
+ advice:"Your sensitivity is a gift, not a flaw. Speak up for what you need, because the people who love you can't read your mind as well as you can read theirs.",
+ comm:"Gentle, tactful and a wonderful listener. A 2 chooses words carefully and picks up on tone and body language. They may hint rather than say things outright.",
+ conflict:"A 2 dislikes conflict and will often give in to keep the peace. Feelings that go unspoken can build up, so they do best with a partner who makes it safe to talk.",
+ ideal:"someone kind, attentive and affectionate who values closeness, makes them feel secure and handles their feelings with care",
+ tip:"Speak gently, ask how they feel and offer reassurance. A kind tone matters as much as the words."},
+3:{strengths:["Creative and imaginative","Wonderful with words","Optimistic and joyful","Socially gifted","Inspires and entertains others"],
+ challenges:["Scattering their energy","Moodiness when unappreciated","Glossing over serious matters","Overspending","Procrastination"],
+ career:"Threes thrive with an audience. Writing, acting, music, art, design, advertising, sales, teaching, public speaking, hospitality and entertainment all suit their gifts.",
+ money:"Money comes and goes easily for a 3. They can earn well through creative or social work, but they enjoy spending as much as earning. A simple budget gives them more freedom, not less.",
+ health:"Threes need fun and self-expression to stay well. When they bottle up feelings, it can show up as throat troubles, fatigue or low moods. Creative outlets and laughter are real medicine for them.",
+ advice:"Pick your best idea and see it through. The world needs your gifts in finished form, not just in brilliant beginnings.",
+ comm:"Lively, expressive and entertaining. A 3 tells stories, uses humor and talks with their hands. They may joke to avoid a heavy subject.",
+ conflict:"A 3 may laugh off a problem or change the subject, then feel hurt later. They make up quickly and do best when conflicts are talked through lightly and honestly.",
+ ideal:"someone who laughs at their jokes, enjoys a social life, appreciates their creativity and keeps romance playful",
+ tip:"Keep it light where you can, listen to their stories, and let humor ease the serious talks."},
+4:{strengths:["Dependable and loyal","Hardworking and disciplined","Organized and practical","Honest and fair","Builds things that last"],
+ challenges:["Rigidity and resistance to change","Working too much","Stubbornness","Being overly critical","Difficulty relaxing"],
+ career:"Fours excel wherever precision and reliability matter: building, engineering, accounting, management, real estate, law, farming, craftsmanship and any work involving systems and structure.",
+ money:"Fours are among the best money managers of all the numbers. They save, plan and build wealth slowly and steadily. Their caution protects them, though it can also make them miss good opportunities.",
+ health:"Fours tend to be physically sturdy but carry stress in their back, shoulders and joints. Routine suits them: regular sleep, regular meals and regular exercise keep them strong.",
+ advice:"Plans can change without the whole structure falling. Leave a little room for surprise, because some of life's best things aren't on the schedule.",
+ comm:"Clear, practical and factual. A 4 says what they mean and means what they say. They prefer facts and plans to feelings and maybes.",
+ conflict:"A 4 digs in and defends what they believe is right. They need time and logic to change their mind, and they respond best to calm, reasonable discussion rather than emotional outbursts.",
+ ideal:"someone loyal, honest and dependable who values commitment, shares their goals and appreciates the security they build",
+ tip:"Be clear and practical, stick to the facts, and give them time to think before deciding."},
+5:{strengths:["Adaptable and versatile","Curious and adventurous","Quick-witted and persuasive","Magnetic and fun","Thrives on change"],
+ challenges:["Restlessness","Impulsiveness","Difficulty with commitment","Overindulgence","Boredom with routine"],
+ career:"Fives need variety and people. Sales, travel, marketing, media, journalism, promotion, tourism, entertainment and consulting all suit them, along with any job that keeps them moving.",
+ money:"Fives can earn well because they sell ideas and adapt quickly, but money can slip through their fingers on travel, fun and impulse buys. An automatic savings plan works best for them.",
+ health:"Fives need movement and variety. Too much routine drains them, and they can overdo food, drink or late nights. Travel, dancing, sports and fresh air keep them balanced.",
+ advice:"Freedom is best used, not spent. Choose commitments that feel like adventures and you will find stability without feeling caged.",
+ comm:"Quick, witty and persuasive. A 5 can talk to anyone about anything and jumps between topics. They may lose interest in long, slow conversations.",
+ conflict:"A 5 may walk away to cool off or avoid the conversation altogether. They forgive quickly but need space, and they react badly to feeling controlled or cornered.",
+ ideal:"someone adventurous and open-minded who gives them room to breathe, loves trying new things and keeps life interesting",
+ tip:"Keep conversations lively, avoid lecturing, and never make them feel fenced in."},
+6:{strengths:["Loving and nurturing","Responsible and reliable","Creates beauty and harmony","A wise counselor","Devoted to family"],
+ challenges:["Taking on too much responsibility","Worry","Trying to fix other people","Perfectionism at home","Self-sacrifice"],
+ career:"Sixes are drawn to caring and beautifying work: teaching, nursing, counseling, interior design, hospitality, cooking, social work, healing, real estate and the beauty trades.",
+ money:"Sixes tend to spend on home and family, and they are generous to a fault. Money usually flows when they do work they care about. They should make sure their giving leaves something for themselves.",
+ health:"Sixes carry other people's worries, which can show up as tension, weight changes or heart strain. Beautiful surroundings, good food and accepting care from others restore them.",
+ advice:"You can't love anyone well if you're running on empty. Let others care for you sometimes, and let them solve some of their own problems.",
+ comm:"Warm, caring and often advisory. A 6 listens with real concern and naturally offers help. They can slip into giving advice when the other person only wanted to be heard.",
+ conflict:"A 6 wants harmony restored and may take responsibility for problems that aren't theirs. They can hold quiet resentment if they feel unappreciated, so speaking openly helps.",
+ ideal:"someone loving, family-minded and appreciative who wants a real home together and gives back as much care as they receive",
+ tip:"Show appreciation for everything they do, and let them know they are valued, not just needed."},
+7:{strengths:["Analytical and wise","Deeply intuitive","Seeks the truth","An independent thinker","Calm and dignified"],
+ challenges:["Isolation and aloofness","Skepticism and distrust","Difficulty sharing feelings","Perfectionism","Living in their head"],
+ career:"Sevens are the specialists and experts. Research, science, analysis, technology, writing, teaching, investigation, philosophy and spiritual work all reward their depth.",
+ money:"Sevens aren't motivated by money for its own sake. They earn best as experts and specialists, and they should be careful not to neglect practical money matters while their mind is on deeper things.",
+ health:"Sevens need solitude and quiet to recharge. Overthinking can cause nervous strain and poor sleep. Nature, meditation and time alone are essential, not optional.",
+ advice:"Not everything can be proven before it is trusted. Let the right people in, and you'll find your depth is something to share, not hide.",
+ comm:"Thoughtful, precise and selective. A 7 prefers deep conversation to small talk and may go quiet while thinking. Their words carry weight when they speak.",
+ conflict:"A 7 withdraws to think things over and may seem cold. They need time alone before talking, and they respond best to calm, honest discussion without pressure.",
+ ideal:"someone intelligent and trustworthy who enjoys deep conversation, respects their need for quiet time and doesn't crowd them",
+ tip:"Give them time and space to think, ask thoughtful questions, and skip the small talk."},
+8:{strengths:["Ambitious and capable","A natural authority","Excellent business judgment","Resilient","Generous with success"],
+ challenges:["Workaholism","A need for control","Materialism","Impatience with weakness","Neglecting love for goals"],
+ career:"Eights belong where big decisions are made: business ownership, finance, banking, law, management, real estate, politics and executive leadership.",
+ money:"Eights have the strongest money vibration of all the numbers. They can build real wealth, but they can also see big ups and downs. Integrity and generosity keep their fortunes steady.",
+ health:"Eights push hard and can ignore their body until it forces a stop. Stress-related exhaustion and blood pressure are the classic warnings. Scheduled rest is as important to them as any meeting.",
+ advice:"Real power includes kindness. Measure success by the people you lift up along the way, and make time for love before you need to.",
+ comm:"Confident, decisive and businesslike. An 8 gets to the point and expects results. They can sound commanding even when they're just being efficient.",
+ conflict:"An 8 wants to be in control and to come out on top. They respect strength and directness, and they calm down fastest when they feel respected rather than challenged.",
+ ideal:"someone strong, capable and confident in their own right who respects their ambition and shares in building the good life",
+ tip:"Be confident and straightforward, respect their time, and talk in terms of goals and results."},
+9:{strengths:["Compassionate and generous","Broad-minded and wise","Artistic and creative","Idealistic","Inspires others"],
+ challenges:["Difficulty letting go","Martyrdom","Scattered focus","Disappointment when ideals aren't met","Distance from those closest to them"],
+ career:"Nines are called to work that serves something larger: teaching, healing, the arts, charity, social causes, law, medicine, travel and counseling.",
+ money:"Nines often find that money comes when they stop chasing it and focus on service. They are generous givers and should be careful not to give away more than they can afford.",
+ health:"Nines feel the world's pain deeply, which can wear them down. Creative expression, travel and forgiveness, of others and of themselves, are the keys to their wellbeing.",
+ advice:"Let go of what is finished, and forgive what still hurts. Every ending you accept makes room for something better.",
+ comm:"Warm, wise and inclusive. A 9 sees the big picture and speaks with compassion. They may be more open with strangers than with the people closest to them.",
+ conflict:"A 9 tries to rise above conflict and see both sides, but may hold on to hurts longer than they admit. Forgiveness is both their gift and their lesson.",
+ ideal:"someone kind-hearted and idealistic who shares their values and supports their larger purpose in life",
+ tip:"Appeal to their ideals, be generous with understanding, and gently encourage them to share what hurts."},
+11:{strengths:["Highly intuitive","Inspiring and visionary","Spiritually aware","Sensitive to others","Charismatic"],
+ challenges:["Nervous tension","Self-doubt","Unrealistic expectations","Mood swings","Feeling overwhelmed"],
+ career:"Elevens are drawn to work that uplifts: counseling, ministry, the healing arts, teaching, the arts, inspirational speaking and psychology.",
+ money:"Elevens aren't usually driven by money, and they can neglect practical matters while focused on ideals. They do best with a simple plan, or a practical partner to handle the details.",
+ health:"Elevens have a finely tuned nervous system. They need rest, quiet, good sleep and grounding activities like walks in nature to stay balanced.",
+ advice:"Trust your inner voice, but take care of the body that carries it. Your light shines brightest when you are rested and grounded.",
+ comm:"Inspired, intuitive and sometimes intense. An 11 senses what isn't said and can speak to the heart of a matter. They may struggle to put deep feelings into words.",
+ conflict:"An 11 feels conflict deeply and may become anxious or withdraw. They need reassurance and gentleness, and they bring great insight once calm.",
+ ideal:"someone emotionally aware and spiritually minded who understands their sensitivity and shares their search for meaning",
+ tip:"Be gentle and patient, honor their intuition, and create a calm space for deeper talks."},
+22:{strengths:["Visionary and practical","A masterful organizer","Ambitious for the greater good","Disciplined","Leaves a lasting legacy"],
+ challenges:["Enormous self-pressure","Fear of not living up to potential","Overwork","Controlling tendencies","Impatience"],
+ career:"Twenty-twos turn big dreams into reality: architecture, large-scale business, international work, engineering, politics and building institutions.",
+ money:"Twenty-twos can build significant wealth and often use it to create something lasting. Their main challenge is balancing grand ambitions with patience.",
+ health:"Twenty-twos carry heavy responsibilities and can suffer from stress and exhaustion. Pacing themselves and delegating are essential.",
+ advice:"Build step by step. Your vision is real, but even the greatest structures are built one brick at a time.",
+ comm:"Purposeful, practical and visionary. A 22 explains big ideas in practical terms and expects follow-through.",
+ conflict:"A 22 approaches conflict like a problem to solve and can be impatient with emotional detours. They do best when reminded that feelings are part of the plan.",
+ ideal:"someone steady and supportive who believes in their vision and wants to build a lasting life and legacy together",
+ tip:"Show that you believe in their vision, be practical, and make room for feelings in their plans."},
+33:{strengths:["Unconditional love","A gift for healing and teaching","Selfless service","Wisdom","Uplifts everyone around them"],
+ challenges:["Self-sacrifice","Taking on others' burdens","Perfectionism","Worry","Difficulty receiving"],
+ career:"Thirty-threes are natural teachers, healers and caregivers. Counseling, ministry, the arts and humanitarian leadership suit them.",
+ money:"Thirty-threes often put service before income. They benefit from valuing their work fairly and accepting payment without guilt.",
+ health:"Thirty-threes give endlessly and must protect their own energy. Rest, boundaries and letting others care for them are essential.",
+ advice:"Love yourself with the same care you give everyone else. A healer who rests heals longer.",
+ comm:"Loving, encouraging and wise. A 33 speaks to uplift and comfort, and people trust their words.",
+ conflict:"A 33 wants everyone to feel loved and may sacrifice their own needs to end a conflict. Learning to state their needs keeps them balanced.",
+ ideal:"someone gentle, loving and appreciative who supports their caring nature and makes sure they are cared for too",
+ tip:"Thank them often, encourage them to state their own needs, and offer care in return."}
+};
+
+const PYX = {
+1:{love:"Singles attract others with fresh confidence, so get out and meet people. Couples benefit from trying something new together.",career:"An excellent year to start a business, apply for a new job or launch a project. Act on your ideas.",money:"Income can grow through your own initiative. Invest in new ventures, but carefully.",health:"Your willpower is strong, which makes this an ideal year to start a new health routine.",advice:"Don't wait for permission. What you begin now sets the tone for the next nine years."},
+2:{love:"One of the most romantic years of the cycle. Singles may meet someone meaningful, and couples grow closer. Let things unfold naturally.",career:"Work behind the scenes, collaborate and build alliances. Recognition may be slow, but it is coming.",money:"Steady rather than spectacular. Good for partnerships and joint finances; avoid risky moves.",health:"Emotional stress affects the body this year. Rest, gentle exercise and calm surroundings help.",advice:"Patience is power this year. Let others meet you halfway."},
+3:{love:"Flirtatious and fun. Social events bring new admirers, and couples should plan dates and laugh together.",career:"Creativity, communication and networking pay off. Promote yourself and your work.",money:"Money flows in and out. Enjoy yourself, but watch impulse spending.",health:"Keep stress light and express your feelings rather than bottling them up.",advice:"Say yes to joy, but finish one thing before starting three more."},
+4:{love:"Relationships deepen through commitment and practical support. Singles may meet someone steady through work or daily routines.",career:"Hard work builds lasting results. Get organized and handle the details.",money:"Budget, save and plan. A good year for paying down debt and building security.",health:"Pay attention to your body with routine checkups, steady exercise and good sleep.",advice:"Do the work now and enjoy the rewards later."},
+5:{love:"Exciting and unpredictable. Romance may arrive suddenly, and couples should travel or shake up their routines.",career:"Change is in the air: a new job, a new role or a new direction. Stay flexible.",money:"Opportunities come quickly. Think before you leap and avoid gambling.",health:"Watch for overindulgence, and channel restless energy into activity and travel.",advice:"Embrace change, but don't throw away what you have built."},
+6:{love:"The marriage and family year. Commitments, engagements, weddings and reconciliations are common, and singles may meet someone with real long-term potential.",career:"Service and responsibility are rewarded, especially in caring, teaching or home-related work.",money:"Spending on home and family is likely. Also good for property and domestic investments.",health:"Balance caring for others with caring for yourself.",advice:"Love generously, but don't carry everyone else's load."},
+7:{love:"Quiet and deep. Relationships benefit from honesty and meaningful conversation. Singles shouldn't force things.",career:"Study, research and develop your expertise. Rather than pushing for advancement, prepare for it.",money:"Not a year for big financial risks. Review, plan and analyze.",health:"Rest, meditation and time in nature are essential this year.",advice:"Look inward. The answers come in quiet moments."},
+8:{love:"Make time for love despite a busy schedule. Couples may reach shared financial goals.",career:"Promotions, recognition and business success are favored. Take charge.",money:"A strong year for income and investments. Handle money with integrity.",health:"Watch stress and overwork, and schedule rest like an important appointment.",advice:"Think big and act with confidence, but stay generous."},
+9:{love:"Relationships that have run their course may end, while strong ones deepen into a more compassionate bond. Singles do best to heal and prepare.",career:"Finish projects and tie up loose ends. Save major new ventures for next year.",money:"Clear debts and clutter, and give generously where you can.",health:"Release stress through forgiveness, creative outlets and rest.",advice:"Let go gracefully. Endings make room for your new beginning."},
+11:{love:"Soul connections are possible. Trust your intuition about people.",career:"Inspiration and visibility. You may be called to teach, lead or inspire.",money:"Don't neglect practical matters while inspired; keep your finances simple.",health:"Protect your nervous system and rest well.",advice:"Trust your hunches and share your light."},
+22:{love:"Relationships grounded in shared goals thrive, so build something together.",career:"Big projects can become reality through disciplined work.",money:"Good for long-term investments and building lasting assets.",health:"Pace yourself, because heavy responsibility can wear you down.",advice:"Dream big, then build step by step."}
+};
+
+const PMX = {
+1:{text:"A month of fresh starts. Energy is high and new opportunities appear, so take the initiative rather than waiting. Begin the project, make the call, set the goal.",love:"Make the first move.",work:"Launch, propose, start.",money:"Invest in new ideas wisely.",health:"Begin a new routine."},
+2:{text:"A slower, gentler month for cooperation and patience. Things develop behind the scenes, so don't force results. Pay attention to the details and to other people's feelings.",love:"Romance and closeness.",work:"Collaborate as a team.",money:"Hold steady; no big risks.",health:"Rest and ease emotional stress."},
+3:{text:"A social, creative month. Invitations, conversations and creative ideas flow. Express yourself, enjoy your friends and let some fun into your schedule.",love:"Flirtation and fun dates.",work:"Communicate, promote, create.",money:"Watch impulse spending.",health:"Laugh, play, express feelings."},
+4:{text:"A practical, productive month. Get organized, catch up on paperwork and put in solid effort. What you build now will hold.",love:"Show love through actions.",work:"Focus, organize, finish tasks.",money:"Budget and save.",health:"Keep a steady routine."},
+5:{text:"A lively month of change and movement. Expect the unexpected, travel if you can and say yes to something new. Stay flexible when plans shift.",love:"Surprises and excitement.",work:"Changes and new options.",money:"Think before you spend.",health:"Stay active; avoid excess."},
+6:{text:"A month centered on home, family and love. Others may need your help, and domestic matters come to the fore. A beautiful month for romance and commitment.",love:"Commitment and tenderness.",work:"Service is rewarded.",money:"Home and family expenses.",health:"Care for yourself too."},
+7:{text:"A quiet, reflective month. Slow down, rest and think things through. Study, research and spiritual practice are favored, and outer results may come slowly.",love:"Deep, honest conversations.",work:"Research and plan.",money:"Review; avoid big moves.",health:"Rest and recharge."},
+8:{text:"A powerful month for career, money and authority. Make big decisions, ask for what you are worth and handle business with confidence.",love:"Make time despite busyness.",work:"Advancement and recognition.",money:"Strong financial energy.",health:"Watch stress and overwork."},
+9:{text:"A month of completion and release. Finish what is unfinished, clear out what you don't need and forgive what still weighs on you. Make room for what is coming.",love:"Heal and let go.",work:"Wrap up projects.",money:"Clear debts and clutter.",health:"Release stress; rest."},
+11:{text:"A Master month of heightened intuition and inspiration. Ideas and insights come quickly, so trust your inner voice, and take extra care of your nerves.",love:"Soulful connection.",work:"Inspire and lead.",money:"Keep things simple.",health:"Protect your nerves."},
+22:{text:"A Master month for building. Big plans can take concrete shape through steady, disciplined work. Think large, act practically.",love:"Build something together.",work:"Large-scale progress.",money:"Long-term investments.",health:"Pace yourself."}
+};
+
+const QP = {1:"fresh starts",2:"patience and partnership",3:"social fun and creativity",4:"hard work and organizing",5:"change and adventure",6:"love, home and family",7:"rest and reflection",8:"career and money matters",9:"endings and release",11:"inspiration and intuition",22:"big building projects"};
+const PD = {1:"Start something new",2:"Cooperate and be patient",3:"Socialize and create",4:"Work and get organized",5:"Expect change; stay flexible",6:"Home, family and love",7:"Rest, reflect, study",8:"Business and money matters",9:"Finish things and let go",11:"Trust your intuition",22:"Build something big"};
+
+const KL = {
+1:"Learning independence and self-confidence. Life will ask you to stand on your own feet, make decisions and trust your own judgment.",
+2:"Learning patience, cooperation and tact. Life will teach you to work with others, listen carefully and value partnership.",
+3:"Learning self-expression. Life will encourage you to speak up, share your feelings and let your creativity show.",
+4:"Learning discipline and order. Life will ask you to finish what you start, stay organized and build steadily.",
+5:"Learning to embrace change. Life will nudge you out of your comfort zone so you grow more adaptable and adventurous.",
+6:"Learning responsibility in love. Life will teach you to commit, care for others and accept care in return.",
+7:"Learning faith and inner wisdom. Life will invite you to look beneath the surface, study and trust your intuition.",
+8:"Learning to handle money and power. Life will teach you to manage resources wisely and own your authority.",
+9:"Learning compassion and letting go. Life will ask you to forgive, give generously and see the bigger picture."
+};
+const KD = {
+13:"Karmic Debt 13 points to lessons around hard work and focus. Shortcuts tend not to work for you; steady, patient effort does. When you commit fully, your results are solid and lasting.",
+14:"Karmic Debt 14 points to lessons around freedom and moderation. Life asks you to use your freedom responsibly and avoid excess. Adaptability combined with self-control is your key to success.",
+16:"Karmic Debt 16 points to lessons around ego and humility. Life may humble pride and break down false structures so that something truer can be built. Each fall becomes a rise to a higher understanding.",
+19:"Karmic Debt 19 points to lessons around independence and accepting help. You are learning to stand on your own without shutting others out. True strength includes accepting support."
+};
+const HP = {1:"a passion for leadership and doing things your own way",2:"a passion for partnership, harmony and helping people connect",3:"a passion for creativity, words and self-expression",4:"a passion for order, building and getting things right",5:"a passion for freedom, travel and new experiences",6:"a passion for home, family and caring for others",7:"a passion for knowledge, mystery and understanding",8:"a passion for achievement, business and success",9:"a passion for helping humanity and making a difference"};
+const PIN = {
+1:"A period of independence and self-development. You are called to stand on your own, take initiative and build confidence.",
+2:"A period of partnership, patience and cooperation. Relationships and teamwork are central, and progress comes through others.",
+3:"A period of creativity, social life and self-expression. Friendships, artistic pursuits and joy flourish.",
+4:"A period of hard work and building foundations. Effort, discipline and practical achievement shape these years.",
+5:"A period of change, freedom and adventure. Travel, moves and new experiences keep life moving.",
+6:"A period centered on love, family and responsibility. Marriage, children, home and community are highlighted.",
+7:"A period of study, reflection and spiritual growth. Inner development matters more than outer success.",
+8:"A period of achievement, authority and financial growth. Career and material success are strongly favored.",
+9:"A period of compassion, completion and service. Generosity and a broad vision bring fulfillment.",
+11:"A Master period of inspiration and spiritual insight. You may be called to inspire or teach others.",
+22:"A Master period for building something lasting on a large scale.",
+33:"A Master period of healing, teaching and loving service."
+};
+const CHAL = {
+0:"The Challenge of Choice. No single obstacle stands out; instead you face many choices, and the lesson is to choose wisely and develop every side of yourself.",
+1:"Overcoming self-doubt, and learning to assert yourself without becoming domineering.",
+2:"Overcoming oversensitivity, and learning to stand firm without being hurt by every word.",
+3:"Overcoming scattered energy or shyness, and learning to express yourself with focus.",
+4:"Overcoming rigidity or a reluctance to work, and learning steady, balanced habits.",
+5:"Overcoming restlessness and impulsiveness, and learning to use freedom wisely.",
+6:"Overcoming perfectionism and over-responsibility, and learning to accept others as they are.",
+7:"Overcoming distrust and isolation, and learning to have faith in yourself and others.",
+8:"Overcoming struggles around money and control, and learning to balance material and personal values."
+};
+const RY = {
+1:"a year of new beginnings for the two of you. Start something together: a home, a project or a new chapter.",
+2:"a tender, romantic year for growing closer. Patience and kindness deepen your bond.",
+3:"a fun, social year. Laugh together, go out, celebrate and enjoy each other.",
+4:"a year of building together. Practical plans, finances and commitment strengthen the relationship.",
+5:"an exciting year of change. Travel, new experiences or even a move may be on the horizon for you as a couple.",
+6:"a year of love, home and commitment. Engagements, weddings, family events and domestic plans are highlighted.",
+7:"a quiet, reflective year. Spend meaningful time together and talk honestly about your deeper hopes.",
+8:"a year of shared achievement. Joint finances and goals prosper when you work as a team.",
+9:"a year of completion. Release old patterns and grudges to make room for a fresh start together next year.",
+11:"a Master year of spiritual connection and strong intuition between you.",
+22:"a Master year for building something lasting together."
+};
+const SCORE_TXT = {5:"These numbers fit together naturally.",4:"These numbers are in harmony.",3:"These numbers are different but compatible.",2:"These numbers pull in different directions, so this area takes some understanding.",1:"These numbers clash, so this is an area for patience and compromise."};
+const DYN = {AA:"Both of you value independence here, which brings respect for each other's space.",BB:"Both of you are practical here, which makes it easy to agree on plans.",CC:"Both of you lead with the heart here, which brings warmth and understanding.",AB:"One of you brings ideas and freedom, the other brings stability and follow-through.",AC:"One of you brings ideas and direction, the other brings warmth and creativity.",BC:"One of you brings stability, the other brings warmth and creativity."};
+
+/* ---------- Extra calculations ---------- */
+function karmicIn(n){ while(n>9){ if([13,14,16,19].includes(n)) return n; n=digitSum(n); } return 0; }
+function letterValues(name){ const out=[]; for(const w of nameParts(name)) for(const c of w) if(LETTER[c]) out.push(LETTER[c]); return out; }
+function extras(p, P, Y){
+  const vals=letterValues(p.name);
+  const counts=[0,0,0,0,0,0,0,0,0,0]; vals.forEach(v=>counts[v]++);
+  const lessons=[1,2,3,4,5,6,7,8,9].filter(d=>counts[d]===0);
+  const maxc=Math.max(...counts.slice(1));
+  const passion=[1,2,3,4,5,6,7,8,9].filter(d=>counts[d]===maxc && maxc>0);
+  const debts=[];
+  const add=(n,src)=>{ if(n && !debts.some(x=>x.n===n&&x.src===src)) debts.push({n,src}); };
+  add(karmicIn(P.lp.t),"Life Path"); add(karmicIn(P.ex.total),"Expression"); add(karmicIn(P.su.total),"Soul Urge");
+  add(karmicIn(P.pe.total),"Personality"); add([13,14,16,19].includes(p.d)?p.d:0,"Birthday");
+  // Pinnacles & Challenges
+  const m=reduce(p.m,false), d=reduce(p.d,false), y=reduce(digitSum(p.y),false);
+  const pins=[reduce(m+d), reduce(d+y)]; pins.push(reduce(base(pins[0])+base(pins[1]))); pins.push(reduce(m+y));
+  const ch=[Math.abs(m-d), Math.abs(d-y)]; ch.push(Math.abs(ch[0]-ch[1])); ch.push(Math.abs(m-y));
+  const end1=36-base(P.lp.n);
+  const ages=[[0,end1],[end1+1,end1+9],[end1+10,end1+18],[end1+19,null]];
+  const age=Y-p.y; let cur=ages.findIndex(([a,b])=>age>=a && (b===null||age<=b)); if(cur<0) cur=0;
+  return {counts,lessons,passion,maxc,debts,pins,ch,ages,cur,age};
+}
+
+/* ---------- Report helpers (in-depth) ---------- */
+function lifeLines(o, keys){ return `<div class="lines">${keys.map(([k,l])=>`<div><b>${l}</b>${o[k]}</div>`).join("")}</div>`; }
+function bulletList(arr){ return `<ul class="plain">${arr.map(x=>`<li>${x}</li>`).join("")}</ul>`; }
+function chips(arr, cls=""){ return `<div class="focus">${arr.map(f=>`<span class="chip ${cls}">${f}</span>`).join("")}</div>`; }
+function listWords(a){ return a.length<=1? a.join("") : a.slice(0,-1).join(", ")+" and "+a[a.length-1]; }
+
+function letterChart(){
+  const cols=[[],[],[],[],[],[],[],[],[]];
+  Object.entries(LETTER).forEach(([L,v])=>cols[v-1].push(L));
+  return `<table class="chart"><thead><tr>${cols.map((_,i)=>`<th>${i+1}</th>`).join("")}</tr></thead><tbody>${[0,1,2].map(r=>`<tr>${cols.map(c=>`<td>${c[r]||""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+function howFound(){
+  return `<h2>How Your Numbers Were Found</h2>
+  <p>This reading uses the <b>Pythagorean system</b>, the most widely used method of numerology in the Western world. Each letter of your full birth name is given a number from 1 to 9:</p>
+  ${letterChart()}
+  <div class="lines one">
+    <div><b>Life Path</b>Your full birth date: month, day and year, each reduced and then added together. It is the most important number in your chart.</div>
+    <div><b>Expression</b>Every letter of your full birth name. It shows your natural talents.</div>
+    <div><b>Soul Urge</b>The vowels (A, E, I, O, U, and sometimes Y) in your name. It reveals your heart's desire.</div>
+    <div><b>Personality</b>The consonants in your name. It describes the face you show the world.</div>
+    <div><b>Birthday</b>The day of the month you were born. It adds a special talent.</div>
+    <div><b>Maturity</b>Your Life Path plus your Expression. It shows who you grow into over the years.</div>
+  </div>
+  <p class="calc" style="margin-top:8px">Numbers are reduced by adding their digits together (for example, 28 becomes 2 + 8 = 10, then 1 + 0 = 1). The Master Numbers 11, 22 and 33 are special and are not reduced.</p>`;
+}
+function extrasGrid(X){
+  const items=[
+    ["Hidden Passion", X.passion.length? X.passion.join(" &amp; ") : "&ndash;"],
+    ["Karmic Lessons", X.lessons.length? X.lessons.join(", ") : "None"],
+    ["Karmic Debt", X.debts.length? [...new Set(X.debts.map(d=>d.n))].join(", ") : "None"],
+    ["Current Pinnacle", X.pins[X.cur]]
+  ];
+  return `<div class="numgrid small">${items.map(([l,v])=>`<div class="numcard"><div class="lbl">${l}</div><div class="minival">${v}</div></div>`).join("")}</div>`;
+}
+function deepNumber(label, obj, posText, sub){
+  const D=DEEP[obj.n];
+  return `<div class="meaning"><div class="mh">${badge(obj.n)}<div><h3>${label} ${obj.n} &mdash; ${N[obj.n].kw}</h3>${sub?`<div class="sub">${sub}</div>`:""}</div></div>
+    <div class="calc">${esc(obj.calc)}</div><p>${posText}</p></div>
+    <div class="twocol"><div class="box"><h3>Strengths</h3>${bulletList(D.strengths)}</div><div class="box"><h3>Challenges</h3>${bulletList(D.challenges)}</div></div>
+    ${lifeLines(D,[["career","Career &amp; Calling"],["money","Money"],["health","Health &amp; Energy"],["advice","Advice"]])}`;
+}
+function inDepth(P){
+  return deepNumber("Life Path",P.lp,N[P.lp.n].lp,"Your purpose and the road you travel")
+   + `<h2>Your Other Core Numbers</h2>`
+   + meaning("Expression",P.ex,`${N[P.ex.n].ex} <b>Work that suits your talents:</b> ${DEEP[P.ex.n].career}`,"Your natural talents and abilities")
+   + chips(DEEP[P.ex.n].strengths)
+   + meaning("Soul Urge",P.su,`${N[P.su.n].su} When your life includes this, you feel fulfilled. When it is missing, no amount of outer success feels quite like enough.`,"Your heart's deepest desire")
+   + meaning("Personality",P.pe,`${N[P.pe.n].pe} This is the energy people pick up on before they know you well, and the kind of people you naturally attract at first meeting.`,"How others see you")
+   + meaning("Birthday",P.bd,`Your birthday gives you ${N[P.bd.n].bd}. It is a tool you can always reach for, especially when your Life Path feels like hard going.`,"A special talent")
+   + meaning("Maturity",P.ma,`As the years go by, you grow more and more into the energy of ${N[P.ma.n].kw.replace(/^The /,"the ")}, bringing out ${N[P.ma.n].bd}. This number usually becomes noticeable from your mid-thirties on and grows stronger with age.`,"Who you are becoming");
+}
+function karmicSection(X){
+  let h=`<h2>Karmic Lessons, Karmic Debt &amp; Hidden Passion</h2>
+  <h3>Karmic Lessons</h3>
+  <p class="calc">Numbers from 1 to 9 that do not appear anywhere in your full birth name.</p>`;
+  h += X.lessons.length
+    ? `<p>Your name is missing ${X.lessons.length===1?"the number":"the numbers"} ${listWords(X.lessons.map(String))}. These point to qualities you are here to develop in this lifetime. You may find the same kinds of situations coming back until the lesson is learned.</p>`
+      + X.lessons.map(n=>`<div class="meaning"><div class="mh">${badge(n)}<div><h3>Karmic Lesson ${n}</h3></div></div><p>${KL[n]}</p></div>`).join("")
+    : `<p>Every number from 1 to 9 appears in your name, so you have no Karmic Lessons. This suggests a well-rounded set of tools to draw on throughout life.</p>`;
+  h += `<h3>Karmic Debt</h3><p class="calc">The numbers 13, 14, 16 and 19, when they appear in your core calculations.</p>`;
+  h += X.debts.length
+    ? X.debts.map(d=>`<div class="meaning"><div class="mh">${badge(d.n)}<div><h3>Karmic Debt ${d.n}</h3><div class="sub">Found in your ${d.src}</div></div></div><p>${KD[d.n]}</p></div>`).join("")
+    : `<p>No Karmic Debt numbers appear in your chart. You are free to build on your talents without carrying an old lesson from the past.</p>`;
+  h += `<h3>Hidden Passion</h3><p class="calc">The number that appears most often in your full birth name (${X.maxc} times).</p>`;
+  h += `<p>Your Hidden Passion is ${listWords(X.passion.map(String))}, showing ${listWords(X.passion.map(n=>HP[n]))}. This is a talent you return to again and again, often without realizing it, and it can be a strong guide when choosing work and hobbies.</p>`;
+  return h;
+}
+function pinnacleSection(p, X){
+  const yr=a=>p.y+a;
+  const rows=X.ages.map(([a,b],i)=>`<tr class="${i===X.cur?"now":""}"><td>${["First","Second","Third","Fourth"][i]}</td><td>${b===null?`${a} onward`:`${a} &ndash; ${b}`}</td><td>${b===null?`${yr(a)} onward`:`${yr(a)} &ndash; ${yr(b)}`}</td><td class="n">${X.pins[i]}</td><td class="n">${X.ch[i]}</td></tr>`).join("");
+  return `<h2>Pinnacles &amp; Challenges: The Four Seasons of Your Life</h2>
+  <p>Life unfolds in four great periods. Each <b>Pinnacle</b> describes the opportunities and the general atmosphere of that period, and each <b>Challenge</b> describes the obstacle you are learning to overcome at the same time. The first period ends at age ${X.ages[0][1]} (36 minus your Life Path), and each of the next two lasts nine years.</p>
+  <table class="months pin"><thead><tr><th>Period</th><th>Ages</th><th>Years</th><th style="text-align:center">Pinnacle</th><th style="text-align:center">Challenge</th></tr></thead><tbody>${rows}</tbody></table>
+  <p class="calc">Your current period is highlighted.</p>
+  ${X.ages.map((_,i)=>`<div class="meaning"><div class="mh">${badge(X.pins[i])}<div><h3>${["First","Second","Third","Fourth"][i]} Pinnacle: ${X.pins[i]}${i===X.cur?" &nbsp;<span class=\"tag rom\">Now</span>":""}</h3></div></div>
+    <p>${PIN[X.pins[i]]} <b>Challenge ${X.ch[i]}:</b> ${CHAL[X.ch[i]]}</p></div>`).join("")}`;
+}
+function loveSection(P, name){
+  const L=DEEP[P.lp.n];
+  return `<h2>In Love &amp; Relationships</h2>
+  <p>${N[P.lp.n].love}</p>
+  <p><b>Your heart's desire (Soul Urge ${P.su.n}):</b> ${N[P.su.n].su}</p>
+  <div class="twocol"><div class="box"><h3>How You Communicate</h3><p>${L.comm}</p></div><div class="box"><h3>How You Handle Conflict</h3><p>${L.conflict}</p></div></div>
+  <p><b>Your ideal partner</b> is ${L.ideal}.</p>
+  <p><b>Something to be aware of:</b> as ${an(P.lp.n)}, you ${N[P.lp.n].shadow}.</p>`;
+}
+function monthBlocks(py){
+  return MONTHS.map((mn,i)=>{ const pm=personalMonth(py,i), X=PMX[pm];
+    return `<div class="mblock"><div class="mt">${badge(pm)}<h3>${mn} &mdash; Personal Month ${pm}${romanceTag(pm)}</h3></div><p>${X.text}</p>
+      ${lifeLines(X,[["love","Love"],["work","Work"],["money","Money"],["health","Health"]])}</div>`; }).join("");
+}
+function seasons(py){
+  const q=[[0,1,2],[3,4,5],[6,7,8],[9,10,11]], names=["Winter (January &ndash; March)","Spring (April &ndash; June)","Summer (July &ndash; September)","Autumn (October &ndash; December)"];
+  return q.map((ms,i)=>{ const pm=ms.map(m=>personalMonth(py,m));
+    return `<p><b>${names[i]}:</b> ${MONTHS[ms[0]]} brings ${QP[pm[0]]}, ${MONTHS[ms[1]]} brings ${QP[pm[1]]}, and ${MONTHS[ms[2]]} brings ${QP[pm[2]]}.</p>`; }).join("");
+}
+function keyMonths(py){
+  const pms=MONTHS.map((m,i)=>({m,n:personalMonth(py,i)}));
+  const pick=arr=>pms.filter(x=>arr.includes(x.n)).map(x=>x.m);
+  const out=[];
+  const love=pick([2,6,11]), car=pick([1,8,22]), rest=pick([7]), demand=pick([4,9]);
+  if(love.length) out.push(`<span class="chip love">&#9829; Love &amp; relationships: ${listWords(love)}</span>`);
+  if(car.length) out.push(`<span class="chip">Career &amp; new starts: ${listWords(car)}</span>`);
+  if(rest.length) out.push(`<span class="chip">Rest &amp; reflection: ${listWords(rest)}</span>`);
+  if(demand.length) out.push(`<span class="chip">Months that ask more of you: ${listWords(demand)}</span>`);
+  return `<div class="focus">${out.join("")}</div>`;
+}
+function dayTable(py, Y, mi){
+  const pm=personalMonth(py,mi), days=new Date(Y,mi+1,0).getDate(); let rows="";
+  for(let d=1; d<=days; d++){
+    const pd=reduce(base(pm)+reduce(d,false));
+    const wd=new Date(Y,mi,d).toLocaleDateString("en-US",{weekday:"short"});
+    rows+=`<tr><td class="m">${wd} ${d}</td><td class="n">${pd}</td><td>${PD[pd]}${romanceTag(pd)}</td></tr>`;
+  }
+  return `<p>${MONTHS[mi]} is your Personal Month ${pm}. Each day has its own number as well, found by adding the calendar day to your Personal Month. Use it to choose the best days for important plans.</p>
+  <table class="months"><thead><tr><th>Day</th><th style="text-align:center">No.</th><th>Best used for</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
 /* ---------- Report builders ---------- */
-function yearlyReport(p, Y){
-  const P=profile(p), py=personalYear(p.m,p.d,Y), uy=universalYear(Y);
+function yearlyReport(p, Y, dayMonth){
+  const P=profile(p), py=personalYear(p.m,p.d,Y), uy=universalYear(Y), X=extras(p,P,Y), Y5=PYX[py.n];
   return head("Yearly Numerology Report", `Prepared for <b>${esc(displayName(p.name))}</b>`, `<span>Born ${fmtDate(p)}</span><span>&nbsp;&middot;&nbsp; Year of ${Y}</span>`)
-  + `<h2>Your Core Numbers</h2>` + coreGrid(P)
-  + `<h2>${Y}: Personal Year ${py.n}</h2>`
+  + `<h2>Your Core Numbers</h2>` + coreGrid(P) + extrasGrid(X)
+  + howFound()
+  + `<h2 class="page-break">${Y}: Personal Year ${py.n}</h2>`
   + `<div class="meaning"><div class="mh">${badge(py.n)}<div><h3>Personal Year ${py.n} &mdash; ${N[py.n].kw}</h3><div class="sub">Your theme from January through December ${Y}</div></div></div>
-     <div class="calc">${esc(py.calc)}</div><p>${N[py.n].py}</p>
-     <div class="focus">${N[py.n].focus.map(f=>`<span class="chip">${f}</span>`).join("")}</div></div>`
-  + `<p><b>The year for everyone:</b> ${Y} is a Universal ${uy} year, the backdrop the whole world moves through. ${N[uy].pm}</p>`
-  + `<h2>Month by Month</h2>` + monthTable(py.n, Y, true)
-  + `<h2 class="page-break">What Your Numbers Mean</h2>` + coreMeanings(P)
-  + `<h2>In Love</h2><p>${N[P.lp.n].love}</p><p><b>Your heart's desire (Soul Urge ${P.su.n}):</b> ${N[P.su.n].su}</p>`
+     <div class="calc">${esc(py.calc)}</div><p>${N[py.n].py}</p>${chips(N[py.n].focus)}</div>`
+  + lifeLines(Y5,[["love","Love"],["career","Career"],["money","Money"],["health","Health"]])
+  + `<p><b>Your guiding thought for ${Y}:</b> ${Y5.advice}</p>`
+  + `<p><b>The year for everyone:</b> ${Y} is a Universal ${uy} year, the backdrop the whole world moves through. ${N[uy].pm} When your Personal Year and the Universal Year work together, the year's themes feel especially strong.</p>`
+  + `<h3>Season by Season</h3>` + seasons(py.n)
+  + `<h3>Key Months</h3>` + keyMonths(py.n)
+  + `<h2>Month by Month</h2>` + monthBlocks(py.n)
+  + (dayMonth>=0 ? `<h2>Day by Day: ${MONTHS[dayMonth]} ${Y}</h2>` + dayTable(py.n,Y,dayMonth) : "")
+  + `<h2 class="page-break">Your Numbers in Depth</h2>` + inDepth(P)
+  + karmicSection(X)
+  + pinnacleSection(p, X)
+  + loveSection(P)
   + closing();
 }
 
 function coupleReport(a, b, Y){
   const A=profile(a), B=profile(b), fa=esc(firstName(a.name)), fb=esc(firstName(b.name));
-  const cats=[["Life Path","lp",.40,"Overall direction in life"],["Soul Urge","su",.30,"What each heart needs"],["Expression","ex",.20,"How you each operate"],["Personality","pe",.10,"First impressions and outward style"]];
-  let weighted=0, rows="";
+  const cats=[["Life Path","lp",.30,"Overall direction in life"],["Soul Urge","su",.25,"What each heart needs"],["Expression","ex",.15,"How you each work and operate"],["Personality","pe",.10,"How you come across to others"],["Birthday","bd",.10,"Your special talents"],["Maturity","ma",.10,"Who you are each becoming"]];
+  let weighted=0, rows="", pairs="";
   for(const [lbl,k,w,desc] of cats){
-    const s=compat(A[k].n,B[k].n); weighted+=s*w;
-    rows+=`<tr><td class="cat">${lbl}<div style="font-weight:400;font-size:14px;color:var(--ink2)">${desc}</div></td><td class="num">${A[k].n}</td><td class="num">${B[k].n}</td><td>${scorePill(s)}</td></tr>`;
+    const na=A[k].n, nb=B[k].n, s=compat(na,nb); weighted+=s*w;
+    rows+=`<tr><td class="cat">${lbl}<div style="font-weight:400;font-size:14px;color:var(--ink2)">${desc}</div></td><td class="num">${na}</td><td class="num">${nb}</td><td>${scorePill(s)}</td></tr>`;
+    const key=[GROUP[base(na)],GROUP[base(nb)]].sort().join("");
+    pairs+=`<div class="meaning"><h3>${lbl}: ${na} &amp; ${nb} &nbsp;${scorePill(s)}</h3><p><span class="calc" style="display:block">${desc}</span>${fa} is ${an(na)}, ${N[na].kw.replace(/^The /,"the ")}, and ${fb} is ${an(nb)}, ${N[nb].kw.replace(/^The /,"the ")}. ${SCORE_TXT[s]} ${base(na)===base(nb)?"Sharing the same number gives you a natural understanding in this area.":DYN[key]}</p></div>`;
   }
-  const pct=Math.round(40+ (weighted-1)/4*58);  // 1→40%, 5→98%
+  const pct=Math.round(40+(weighted-1)/4*58);
   const verdict = pct>=85?"A Natural, Easy Harmony": pct>=72?"A Warm and Promising Match": pct>=60?"A Balanced Pairing That Grows With Care":"A Learning Relationship";
   const verdictTxt = pct>=85?"Your numbers flow together naturally. You tend to understand each other without much explanation, and your goals point the same way.":
     pct>=72?"There is genuine harmony here. Most of your numbers support each other, and the differences you do have can add spice and balance.":
@@ -708,38 +1094,52 @@ function coupleReport(a, b, Y){
     "Your numbers come from quite different places, so this relationship asks for extra understanding. Opposites can be powerful teachers for each other when both people are willing to meet halfway.";
   const deg=Math.round(pct*3.6);
   const ga=GROUP[base(A.lp.n)], gb=GROUP[base(B.lp.n)], key=[ga,gb].sort().join("");
-  const relN = reduce(A.lp.n + B.lp.n);
+  const relN=reduce(A.lp.n+B.lp.n);
   const pyA=personalYear(a.m,a.d,Y), pyB=personalYear(b.m,b.d,Y);
+  let cy=reduce(base(relN)+reduce(digitSum(Y),false)); if(cy===33) cy=6;
   const same = base(A.lp.n)===base(B.lp.n) ? `<p>You share the same Life Path energy (${base(A.lp.n)}), which gives you an instant understanding of each other. The flip side is that you can mirror each other's weak spots, so be patient with the qualities you recognize in yourself.</p>` : "";
   const soulNote = compat(A.su.n,B.su.n)>=4 ? `Your Soul Urge numbers (${A.su.n} and ${B.su.n}) are in harmony, which means that at heart you want the same kinds of things from life and love. That is one of the strongest foundations a couple can have.`
     : compat(A.su.n,B.su.n)===3 ? `Your Soul Urge numbers (${A.su.n} and ${B.su.n}) are different but workable. Take time to ask what the other person truly needs, because it may not be what you would need.`
     : `Your Soul Urge numbers (${A.su.n} and ${B.su.n}) want quite different things, so the inner needs of each partner deserve special attention. Talk openly about what makes each of you feel loved.`;
+  const DA=DEEP[A.lp.n], DB=DEEP[B.lp.n];
+  let cm=""; for(let i=0;i<12;i++){ let n=reduce(base(cy)+i+1); if(n===33) n=6; cm+=`<tr><td class="m">${MONTHS[i]}</td><td class="n">${n}</td><td>${PMX[n].love} ${QP[n].charAt(0).toUpperCase()+QP[n].slice(1)}.${romanceTag(n)}</td></tr>`; }
 
   return head("Relationship Report", `<b>${esc(displayName(a.name))}</b> &amp; <b>${esc(displayName(b.name))}</b>`, `<span>Born ${fmtDate(a)} &amp; ${fmtDate(b)}</span>`)
   + `<div class="overall"><div class="dial" style="background:conic-gradient(var(--orange) 0deg, var(--gold) ${deg}deg, #e8dcbd ${deg}deg)"><div class="inner"><div class="pct">${pct}%</div><div class="pl">HARMONY</div></div></div>
      <div class="verdict"><h3>${verdict}</h3><p style="margin:0">${verdictTxt}</p></div></div>`
   + `<h2>Your Numbers Side by Side</h2>
-     <table class="compare"><thead><tr><th style="text-align:left">Number</th><th>${fa}</th><th>${fb}</th><th>Harmony</th></tr></thead><tbody>${rows}</tbody></table>`
+     <table class="compare"><thead><tr><th style="text-align:left">Number</th><th>${fa}</th><th>${fb}</th><th>Harmony</th></tr></thead><tbody>${rows}</tbody></table>
+     <p class="calc">The overall harmony score weighs each pairing by its importance: Life Path and Soul Urge count the most.</p>`
   + `<h2>The Two of You Together</h2>
      <p>${fa} is a Life Path ${A.lp.n}, ${N[A.lp.n].kw.replace(/^The /,"the ")}, and ${fb} is a Life Path ${B.lp.n}, ${N[B.lp.n].kw.replace(/^The /,"the ")}. ${ga===gb?`You both belong to the ${GROUP_NAME[ga]}.`:`One of you belongs to the ${GROUP_NAME[ga]} and the other to the ${GROUP_NAME[gb]}.`}</p>
      <p>${PAIR[key]}</p>${same}<p>${soulNote}</p>`
+  + `<h2>Every Number, Pair by Pair</h2>` + pairs
   + `<h2>How Each of You Loves</h2><div class="twocol">
      <div class="box"><h3>${fa} &middot; Life Path ${A.lp.n}</h3><p>${N[A.lp.n].love}</p><p><b>Heart's desire (${A.su.n}):</b> ${N[A.su.n].su}</p></div>
      <div class="box"><h3>${fb} &middot; Life Path ${B.lp.n}</h3><p>${N[B.lp.n].love}</p><p><b>Heart's desire (${B.su.n}):</b> ${N[B.su.n].su}</p></div></div>`
+  + `<h2>Communication &amp; Conflict</h2><div class="twocol">
+     <div class="box"><h3>${fa}</h3><p><b>Talks:</b> ${DA.comm}</p><p><b>In conflict:</b> ${DA.conflict}</p></div>
+     <div class="box"><h3>${fb}</h3><p><b>Talks:</b> ${DB.comm}</p><p><b>In conflict:</b> ${DB.conflict}</p></div></div>
+     <p><b>Tips for ${fb} when talking with ${fa}:</b> ${DA.tip}</p>
+     <p><b>Tips for ${fa} when talking with ${fb}:</b> ${DB.tip}</p>`
   + `<h2>Watch Out For</h2>
      <p><b>${fa}</b> ${N[A.lp.n].shadow}. <b>${fb}</b> ${N[B.lp.n].shadow}. Knowing these tendencies ahead of time makes them much easier to handle with kindness and humor.</p>`
-  + `<h2 class="page-break">The Relationship's Own Number</h2>
+  + `<h2>The Relationship's Own Number</h2>
      <div class="meaning"><div class="mh">${badge(relN)}<div><h3>Relationship Number ${relN} &mdash; ${N[relN].kw}</h3><div class="sub">Life Path ${A.lp.n} + Life Path ${B.lp.n}</div></div></div>
      <p>Every relationship has a number of its own, found by adding both Life Paths together. Yours is ${REL[relN]}</p></div>`
-  + `<h2>The Year Ahead: ${Y}</h2>
-     <div class="twocol"><div class="box"><h3>${fa}: Personal Year ${pyA.n}</h3><div class="focus">${N[pyA.n].focus.map(f=>`<span class="chip">${f}</span>`).join("")}</div><p>${N[pyA.n].py.split(". ").slice(0,2).join(". ")}.</p></div>
-     <div class="box"><h3>${fb}: Personal Year ${pyB.n}</h3><div class="focus">${N[pyB.n].focus.map(f=>`<span class="chip">${f}</span>`).join("")}</div><p>${N[pyB.n].py.split(". ").slice(0,2).join(". ")}.</p></div></div>
-     <p>${base(pyA.n)===base(pyB.n)?"You are in the same Personal Year, so you are moving through the same season of life together, which makes it easier to understand and support each other this year.":"You are in different Personal Years, so you are each in a different season of life. Understanding what your partner's year is asking of them makes it much easier to be supportive rather than impatient."}</p>`
+  + `<h2>Romance Outlook for ${Y}</h2>
+     <div class="meaning"><div class="mh">${badge(cy)}<div><h3>Your Year as a Couple: ${cy}</h3><div class="sub">Relationship Number ${relN} + the year ${Y}</div></div></div>
+     <p>For the two of you together, ${Y} is ${RY[cy]}</p></div>
+     <div class="twocol"><div class="box"><h3>${fa}: Personal Year ${pyA.n}</h3>${chips(N[pyA.n].focus)}<p>${PYX[pyA.n].love}</p></div>
+     <div class="box"><h3>${fb}: Personal Year ${pyB.n}</h3>${chips(N[pyB.n].focus)}<p>${PYX[pyB.n].love}</p></div></div>
+     <p>${base(pyA.n)===base(pyB.n)?"You are in the same Personal Year, so you are moving through the same season of life together, which makes it easier to understand and support each other this year.":"You are in different Personal Years, so you are each in a different season of life. Understanding what your partner's year is asking of them makes it much easier to be supportive rather than impatient."}</p>
+     <h3>Month by Month as a Couple</h3>
+     <table class="months"><thead><tr><th>Month</th><th style="text-align:center">No.</th><th>For the two of you</th></tr></thead><tbody>${cm}</tbody></table>`
   + closing();
 }
 
 function singleReport(p, Y){
-  const P=profile(p), fn=esc(firstName(p.name)), py=personalYear(p.m,p.d,Y);
+  const P=profile(p), fn=esc(firstName(p.name)), py=personalYear(p.m,p.d,Y), X=extras(p,P,Y), L=DEEP[P.lp.n];
   const lpb=base(P.lp.n);
   const ranked=[1,2,3,4,5,6,7,8,9].map(n=>({n,s:M[lpb-1][n-1]*10+M[base(P.su.n)-1][n-1]})).sort((x,y)=>y.s-x.s);
   const best=ranked.filter(r=>M[lpb-1][r.n-1]>=4).slice(0,4);
@@ -747,25 +1147,32 @@ function singleReport(p, Y){
   const pms=[...Array(12).keys()].map(i=>({i,n:personalMonth(py.n,i)}));
   const romance=pms.filter(x=>[2,6].includes(base(x.n))).map(x=>MONTHS[x.i]);
   const social=pms.filter(x=>[3,5].includes(base(x.n))).map(x=>MONTHS[x.i]);
-  const list = a => a.length<=1? a.join("") : a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+  let mt=""; pms.forEach(x=>{ mt+=`<tr><td class="m">${MONTHS[x.i]}</td><td class="n">${x.n}</td><td>${PMX[x.n].love} ${PMX[x.n].text.split(". ")[0]}.${romanceTag(x.n)}</td></tr>`; });
 
   return head("Love Match Report", `Prepared for <b>${esc(displayName(p.name))}</b>`, `<span>Born ${fmtDate(p)}</span><span>&nbsp;&middot;&nbsp; Year of ${Y}</span>`)
   + `<h2>Your Core Numbers</h2>` + coreGrid(P)
   + `<h2>How You Love</h2>
-     <div class="meaning"><div class="mh">${badge(P.lp.n)}<div><h3>Life Path ${P.lp.n} &mdash; ${N[P.lp.n].kw}</h3></div></div><p>${N[P.lp.n].love}</p></div>
-     <div class="meaning"><div class="mh">${badge(P.su.n)}<div><h3>Soul Urge ${P.su.n} &mdash; What Your Heart Needs</h3></div></div><p>${N[P.su.n].su}</p></div>
-     <div class="meaning"><div class="mh">${badge(P.pe.n)}<div><h3>Personality ${P.pe.n} &mdash; The First Impression You Make</h3></div></div><p>${N[P.pe.n].pe} Knowing this helps you understand the kind of people you naturally attract on a first meeting.</p></div>
+     <div class="meaning"><div class="mh">${badge(P.lp.n)}<div><h3>Life Path ${P.lp.n} &mdash; ${N[P.lp.n].kw}</h3><div class="sub">Your approach to love</div></div></div><p>${N[P.lp.n].love}</p></div>
+     <div class="meaning"><div class="mh">${badge(P.su.n)}<div><h3>Soul Urge ${P.su.n} &mdash; What Your Heart Needs</h3></div></div><p>${N[P.su.n].su} In a relationship, you feel most loved when your partner understands and supports this.</p></div>
+     <div class="meaning"><div class="mh">${badge(P.pe.n)}<div><h3>Personality ${P.pe.n} &mdash; The First Impression You Make</h3></div></div><p>${N[P.pe.n].pe} Knowing this helps you understand the kind of people you naturally attract on a first meeting, and whether they are drawn to the real you or just the surface.</p></div>
+     <div class="twocol"><div class="box"><h3>How You Communicate</h3><p>${L.comm}</p></div><div class="box"><h3>How You Handle Conflict</h3><p>${L.conflict}</p></div></div>
+     <div class="twocol"><div class="box"><h3>What You Bring to Love</h3>${bulletList(L.strengths)}</div><div class="box"><h3>What to Work On</h3>${bulletList(L.challenges)}</div></div>
      <p><b>Something to be aware of:</b> as ${an(P.lp.n)}, you ${N[P.lp.n].shadow}. Simply knowing this about yourself is half the battle.</p>`
-  + `<h2>Your Best Matches</h2>
-     <p>These are the Life Path numbers most in tune with yours. When you meet someone new, add up the digits of their birth date to find their Life Path and see if it is on this list.</p>
-     <div class="matchlist">${best.map(r=>`<div class="match">${badge(r.n)}<div><h3>Life Path ${r.n} &mdash; ${N[r.n].kw} ${scorePill(M[lpb-1][r.n-1])}</h3><p>${N[r.n].partner}</p></div></div>`).join("")}</div>
-     ${care.length?`<p style="margin-top:12px"><b>Approach with patience:</b> Life Paths ${list(care.map(String))} run on a very different wavelength from yours. These matches are not impossible, and they can teach you a great deal, but they will take more understanding on both sides.</p>`:""}`
-  + `<h2 class="page-break">Love Timing for ${Y}</h2>
-     <div class="meaning"><div class="mh">${badge(py.n)}<div><h3>Personal Year ${py.n} &mdash; ${N[py.n].kw}</h3></div></div><div class="calc">${esc(py.calc)}</div><p>${N[py.n].py}</p></div>
-     <div class="focus">${romance.length?`<span class="chip love">&#9829; Best months for romance: ${list(romance)}</span>`:""}${social.length?`<span class="chip">Best months to get out and meet people: ${list(social)}</span>`:""}</div>
-     ${monthTable(py.n, Y, true)}`
+  + `<h2>Your Ideal Partner</h2>
+     <p>Your numbers suggest you are happiest with ${L.ideal}.</p>
+     <h3>Your Best Matches</h3>
+     <p>These are the Life Path numbers most in tune with yours. When you meet someone new, add up the digits of their full birth date to find their Life Path and see whether it is on this list.</p>
+     <div class="matchlist">${best.map(r=>`<div class="match">${badge(r.n)}<div><h3>Life Path ${r.n} &mdash; ${N[r.n].kw} ${scorePill(M[lpb-1][r.n-1])}</h3><p>${N[r.n].partner}</p><p class="calc" style="margin-top:4px">${DYN[[GROUP[lpb],GROUP[r.n]].sort().join("")]}</p></div></div>`).join("")}</div>
+     ${care.length?`<p style="margin-top:12px"><b>Approach with patience:</b> Life Paths ${listWords(care.map(String))} run on a very different wavelength from yours. These matches are not impossible, and they can teach you a great deal, but they will take more understanding on both sides.</p>`:""}
+     <h3>This Chapter of Your Life</h3>
+     <div class="meaning"><div class="mh">${badge(X.pins[X.cur])}<div><h3>${["First","Second","Third","Fourth"][X.cur]} Pinnacle: ${X.pins[X.cur]}</h3><div class="sub">Ages ${X.ages[X.cur][1]===null?`${X.ages[X.cur][0]} onward`:`${X.ages[X.cur][0]} to ${X.ages[X.cur][1]}`}</div></div></div><p>${PIN[X.pins[X.cur]]}</p></div>`
+  + `<h2>Love Timing for ${Y}</h2>
+     <div class="meaning"><div class="mh">${badge(py.n)}<div><h3>Personal Year ${py.n} &mdash; ${N[py.n].kw}</h3></div></div><div class="calc">${esc(py.calc)}</div><p>${N[py.n].py}</p><p><b>For love this year:</b> ${PYX[py.n].love}</p></div>
+     <div class="focus">${romance.length?`<span class="chip love">&#9829; Best months for romance: ${listWords(romance)}</span>`:""}${social.length?`<span class="chip">Best months to get out and meet people: ${listWords(social)}</span>`:""}</div>
+     <table class="months"><thead><tr><th>Month</th><th style="text-align:center">No.</th><th>Love guidance for ${Y}</th></tr></thead><tbody>${mt}</tbody></table>`
   + `<h2>A Word of Encouragement</h2>
-     <p>${fn}, the right relationship for ${an(P.lp.n)} with a Soul Urge of ${P.su.n} is one where you feel free to be exactly who you are. Look for someone who meets your heart's true need, not just someone who makes a good first impression. Use your best months to say yes to invitations and put yourself where the right person can find you.</p>`
+     <p>${fn}, the right relationship for ${an(P.lp.n)} with a Soul Urge of ${P.su.n} is one where you feel free to be exactly who you are. Look for someone who meets your heart's true need, not just someone who makes a good first impression. ${L.advice}</p>
+     <p>Use your best months to say yes to invitations and to put yourself where the right person can find you.</p>`
   + closing();
 }
 
@@ -841,6 +1248,7 @@ function buildDate(containerId, prefix){
   <div class="field small"><label for="${prefix}-y">Year</label><input id="${prefix}-y" type="number" min="1850" max="2200" placeholder="e.g. 1962"></div>`;
 }
 ["y","a","b","s"].forEach(p=>buildDate(p+"-date",p));
+document.getElementById("y-day").insertAdjacentHTML("beforeend", MONTHS.map((m,i)=>`<option value="${i}">${m}</option>`).join(""));
 const now=new Date(), defYear = now.getMonth()>=9 ? now.getFullYear()+1 : now.getFullYear();
 ["y-year","c-year","s-year"].forEach(id=>document.getElementById(id).value=defYear);
 
@@ -868,7 +1276,7 @@ function generate(kind){
     if(kind==="yearly"){
       const p=readPerson("y","y-name"); if(p.err) return err.textContent=p.err;
       const Y=readYear("y-year"); if(!Y) return err.textContent="Please enter a report year.";
-      show(yearlyReport(p,Y));
+      show(yearlyReport(p,Y,+document.getElementById("y-day").value));
     } else if(kind==="couple"){
       const a=readPerson("a","a-name"); if(a.err) return err.textContent="First person: "+a.err;
       const b=readPerson("b","b-name"); if(b.err) return err.textContent="Second person: "+b.err;
