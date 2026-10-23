@@ -726,6 +726,25 @@ precision highp float;
 uniform sampler2D uTex;
 uniform vec2 uRes, uImg, uDrift, uWob;
 uniform float uMode, uN, uRot, uImgRot, uZoom, uHue, uSat, uBri, uRu, uHas, uRound, uFitShort;
+uniform float uTime, uSwirl, uWave, uShimmer;
+uniform vec4 uRingR, uRingA;
+/* Bends the whole picture with the music:
+   vocals/melody = slow swirl, bass/warm sounds = flowing ripples,
+   cymbals = fine shimmer, beats = soft waves rolling out from the center */
+vec2 warp(vec2 p){
+  float r = length(p);
+  float a = atan(p.y, p.x);
+  float edge = smoothstep(0.0, 0.25, r);
+  a += edge*(0.10 + 0.55*uSwirl)*sin(r*4.5 - uTime*0.9)*0.35;
+  a += edge*uSwirl*0.12*sin(r*9.0 + uTime*0.6);
+  r += edge*(0.004 + 0.03*uWave)*sin(r*11.0 - uTime*1.6);
+  r += edge*uShimmer*0.006*sin(a*18.0 + r*30.0 - uTime*3.0);
+  for (int i = 0; i < 4; i++){
+    float d = r - uRingR[i];
+    r += uRingA[i]*0.045*d*exp(-d*d*55.0)*8.0;
+  }
+  return r*vec2(cos(a), sin(a));
+}
 float roundMask(vec2 uv){
   if (uRound <= 0.0) return 1.0;
   float d = length((uv - 0.5)*uImg)/min(uImg.x, uImg.y);
@@ -747,6 +766,7 @@ void main(){
   if (uHas > 0.5){
     float m = min(uRes.x, uRes.y);
     vec2 p = (gl_FragCoord.xy - 0.5*uRes)/m; p.y = -p.y;
+    p = warp(p);
     if (uMode < 0.5){
       float r = length(p);
       float a = atan(p.y, p.x) - uRot;
@@ -787,7 +807,7 @@ function initGL(){
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, 'aPos'); gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    for (const n of ['uTex','uRes','uImg','uDrift','uWob','uMode','uN','uRot','uImgRot','uZoom','uHue','uSat','uBri','uRu','uHas','uRound','uFitShort'])
+    for (const n of ['uTex','uRes','uImg','uDrift','uWob','uMode','uN','uRot','uImgRot','uZoom','uHue','uSat','uBri','uRu','uHas','uRound','uFitShort','uTime','uSwirl','uWave','uShimmer','uRingR','uRingA'])
       glU[n] = gl.getUniformLocation(prog, n);
     const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -885,6 +905,8 @@ let audioCtx = null, analyser = null, freqData = null, recDest = null, beatAn = 
 let songNode = null, micStream = null, micNode = null;
 const songEl = new Audio();
 let energyHist = [], lastBeat = 0, pulse = 0, level = 0;
+const G = {bass:0, lowmid:0, mid:0, high:0, loud:0, pulse:0};
+const rings = []; let beatsSeen = 0;
 let hueNudge = 0, hueShown = 0, rotVel = 0, turnVel = 0, timeRate = 1, songTime = 0;
 
 function ensureAudio(){
@@ -1031,28 +1053,37 @@ function animFrame(now){
     const spin  = +$('spin').value/100;
     const dir   = spin < 0 ? -1 : 1;
 
+    // second, slower smoothing so every movement glides
+    for (const k of ['bass','lowmid','mid','high','loud']) G[k] = ease(G[k], A[k], dt, 0.45, 0.8);
+    G.pulse = ease(G.pulse, pulse, dt, 0.08, 0.35);
+
     // the song's energy speeds up or slows down the whole dance
-    timeRate = ease(timeRate, 1 + flow*(1.4*A.loud - 0.3), dt, 0.6, 1.2);
+    timeRate = ease(timeRate, 1 + flow*(1.2*G.loud - 0.3), dt, 1.2, 1.8);
     animT += dt*timeRate;
 
     // spin follows melody/vocals (mids), image turn follows cymbals (highs)
-    const spinTarget = spin*0.8*(1 + flow*(1.8*A.mid - 0.45)) + dir*react*0.9*pulse;
-    rotVel = ease(rotVel, spinTarget, dt, 0.5, 0.9);
+    const spinTarget = spin*0.8*(1 + flow*(1.5*G.mid - 0.4)) + dir*react*0.35*G.pulse;
+    rotVel = ease(rotVel, spinTarget, dt, 1.0, 1.4);
     rot += rotVel*dt;
     const turn = +$('turn').value/100;
-    turnVel = ease(turnVel, turn*0.8*(1 + flow*(1.6*A.high - 0.4)), dt, 0.6, 1.0);
+    turnVel = ease(turnVel, turn*0.8*(1 + flow*(1.4*G.high - 0.35)), dt, 1.0, 1.4);
     imgRot += turnVel*dt;
+
+    // beat waves roll outward from the center
+    for (const rg of rings){ rg.r += dt*0.55; rg.a *= Math.exp(-dt*0.9); }
+    while (rings.length && (rings[0].r > 1.8 || rings[0].a < 0.01)) rings.shift();
+    if (beatsSeen !== A.beatCount){ beatsSeen = A.beatCount; rings.push({r: 0.02, a: react}); if (rings.length > 4) rings.shift(); }
 
     // colors drift faster in bright, busy parts; beats nudge them gently
     hue += dt*(+$('hueSpeed').value)*1.5*(1 + flow*1.5*A.high);
-    hueShown = ease(hueShown, hueNudge, dt, 0.35, 0.35);
+    hueShown = ease(hueShown, hueNudge, dt, 0.8, 0.8);
 
     const breathe = +$('breathe').value/100;
     const zoom = (+$('zoom').value/100)
                * (1 + 0.18*breathe*(0.5 + 0.5*Math.sin(animT*0.8)))
-               * (1 + flow*(0.16*A.loud + 0.06*A.bass))
-               * (1 + react*0.12*pulse);
-    const drift = (+$('drift').value/100)*(1 + flow*0.8*A.lowmid);
+               * (1 + flow*(0.10*G.loud + 0.04*G.bass))
+               * (1 + react*0.04*G.pulse);
+    const drift = (+$('drift').value/100)*(1 + flow*0.6*G.lowmid);
     const W = animCanvas.width, H = animCanvas.height, m = Math.min(W, H);
     const Ru = 0.5*Math.hypot(W, H)/m;
 
@@ -1076,14 +1107,22 @@ function animFrame(now){
       gl.uniform2f(glU.uDrift, Math.cos(animT*0.37)*Ru*0.3*drift, Math.sin(animT*0.29)*Ru*0.3*drift);
       gl.uniform2f(glU.uWob, Math.sin(animT*0.5)*0.025*drift, Math.cos(animT*0.41)*0.025*drift);
       gl.uniform1f(glU.uHue, ((hue + hueShown) % 360)*Math.PI/180);
-      gl.uniform1f(glU.uSat, 1 + 0.25*flow*A.high + 0.25*react*pulse);
-      gl.uniform1f(glU.uBri, 1 + 0.12*flow*A.loud + 0.2*react*pulse);
+      gl.uniform1f(glU.uSat, 1 + 0.25*flow*G.high + 0.2*react*G.pulse);
+      gl.uniform1f(glU.uBri, 1 + 0.12*flow*G.loud + 0.18*react*G.pulse);
+      gl.uniform1f(glU.uTime, animT);
+      gl.uniform1f(glU.uSwirl, flow*G.mid);
+      gl.uniform1f(glU.uWave, flow*(0.6*G.lowmid + 0.4*G.bass));
+      gl.uniform1f(glU.uShimmer, flow*G.high);
+      const RR = [9, 9, 9, 9], RA = [0, 0, 0, 0];
+      rings.forEach((rg, i) => { RR[i] = rg.r; RA[i] = rg.a; });
+      gl.uniform4f(glU.uRingR, RR[0], RR[1], RR[2], RR[3]);
+      gl.uniform4f(glU.uRingA, RA[0], RA[1], RA[2], RA[3]);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     } else {
       actx.fillStyle = '#000'; actx.fillRect(0, 0, W, H);
       if (srcImg) drawFallback(W, H, zoom, drift);
     }
-    $('beatLight').style.opacity = (0.15 + 0.85*pulse).toFixed(2);
+    $('beatLight').style.opacity = (0.15 + 0.85*G.pulse).toFixed(2);
 
     if (recording){
       const el = (performance.now() - recStart)/1000;
