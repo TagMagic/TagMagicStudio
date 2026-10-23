@@ -56,6 +56,9 @@ button.active{background:linear-gradient(135deg,#ff4fd8,#7b5cff);border-color:tr
 footer{text-align:center;font-size:12px;color:var(--muted);padding:6px 6px 10px}
 footer a{color:var(--accent2);text-decoration:none;font-weight:600}
 footer a:hover{text-decoration:underline}
+.seekRow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:8px}
+.seekRow input{flex:1;margin:0}
+button:disabled{opacity:.45;cursor:not-allowed}
 .shapes button{flex:1 1 30%;font-size:12px;padding:7px 4px}
 #errBox{position:fixed;right:14px;bottom:14px;max-width:420px;background:#5a0f22;border:1px solid #ff4f6d;color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.4;z-index:9;display:none}
 #busy{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;font-size:22px;z-index:8}
@@ -190,6 +193,7 @@ footer a:hover{text-decoration:underline}
         </select>
       </label>
       <label id="mirrorsRow">Mirrors <span id="mirrorsVal">8</span><input type="range" id="mirrors" min="4" max="24" step="2" value="8"></label>
+      <button id="stopSpinBtn" style="width:100%;margin-top:4px">⏸ Stop Spin</button>
       <label>Spin speed <span id="spinVal">15</span><input type="range" id="spin" min="-100" max="100" value="15"></label>
       <label>Image turn <span id="turnVal">10</span><input type="range" id="turn" min="-100" max="100" value="10"></label>
       <label>Zoom <span id="zoomVal">130</span><input type="range" id="zoom" min="60" max="400" value="130"></label>
@@ -203,9 +207,12 @@ footer a:hover{text-decoration:underline}
       <label class="filebtn">🎵 Load a song (MP3 / WAV)<input type="file" id="songFile" accept="audio/*"></label>
       <div class="row">
         <button id="playBtn">▶ Play</button>
-        <button id="micBtn">🎤 Use Mic</button>
+        <button id="stopSongBtn">⏹ Stop</button>
+        <button id="micBtn">🎤 Mic</button>
       </div>
       <div class="status" id="songName">No music loaded</div>
+      <div class="seekRow"><span id="tCur">0:00</span><input type="range" id="seek" min="0" max="1000" value="0"><span id="tDur">0:00</span></div>
+      <label>Volume (speakers only) <span id="volVal">80</span><input type="range" id="vol" min="0" max="100" value="80"></label>
       <label>Music flow <span id="flowVal">70</span><input type="range" id="flow" min="0" max="100" value="70"></label>
       <label>Beat punch <span id="reactVal">40</span><input type="range" id="react" min="0" max="100" value="40"></label>
       <p class="note"><b>Music flow</b>: how much the whole song (volume, melody, cymbals) steers the speed, size and colors.<br><b>Beat punch</b>: how strongly it bumps on each drum beat.</p>
@@ -230,9 +237,15 @@ footer a:hover{text-decoration:underline}
         </select>
       </label>
       <label class="check"><input type="checkbox" id="incAudio" checked> Include the song in the video</label>
+      <label>When I press Record, start the song
+        <select id="recFrom">
+          <option value="start">from the beginning</option>
+          <option value="here">from where the seek bar is</option>
+        </select>
+      </label>
       <button id="recBtn" class="big rec">⏺ Record Video</button>
       <div class="status" id="recStatus"></div>
-      <p class="note">Keep this tab in front while it records. The video downloads by itself when it's done.</p>
+      <p class="note">Tip: set up your look with the song stopped, then press Record — the song and video start together. Keep this tab in front while it records. The video downloads by itself when it's done.</p>
     </div>
   </aside>
 
@@ -901,6 +914,7 @@ $('tabAnim').onclick = () => showTab('anim');
 $('toAnimBtn').onclick = () => { if (useMandala(false)) showTab('anim'); };
 
 /* ---- Music ---- */
+let songGain = null, spinStopped = false;
 let audioCtx = null, analyser = null, freqData = null, recDest = null, beatAn = null, beatData = null;
 let songNode = null, micStream = null, micNode = null;
 const songEl = new Audio();
@@ -924,7 +938,7 @@ function ensureAudio(){
 function stopMic(){
   if (micStream){ micStream.getTracks().forEach(t => t.stop()); micStream = null; }
   if (micNode){ micNode.disconnect(); micNode = null; }
-  $('micBtn').textContent = '🎤 Use Mic'; $('micBtn').classList.remove('active');
+  $('micBtn').textContent = '🎤 Mic'; $('micBtn').classList.remove('active');
 }
 $('songFile').onchange = e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -933,10 +947,37 @@ $('songFile').onchange = e => {
   songEl.src = URL.createObjectURL(f);
   if (!songNode){
     songNode = audioCtx.createMediaElementSource(songEl);
-    songNode.connect(analyser); songNode.connect(audioCtx.destination); songNode.connect(recDest);
+    songGain = audioCtx.createGain(); songGain.gain.value = +$('vol').value/100;
+    songNode.connect(analyser); songNode.connect(songGain); songGain.connect(audioCtx.destination); songNode.connect(recDest);
   }
   $('songName').textContent = '🎵 ' + f.name;
   songEl.play().catch(() => {}); $('playBtn').textContent = '⏸ Pause';
+};
+function fmtTime(t){ if (!isFinite(t)) t = 0; t = Math.floor(t); return Math.floor(t/60) + ':' + String(t % 60).padStart(2, '0'); }
+let seeking = false;
+$('seek').addEventListener('input', () => {
+  seeking = true;
+  if (songEl.src && isFinite(songEl.duration)){
+    songEl.currentTime = (+$('seek').value/1000)*songEl.duration;
+    $('tCur').textContent = fmtTime(songEl.currentTime);
+  }
+});
+$('seek').addEventListener('change', () => { seeking = false; });
+songEl.addEventListener('loadedmetadata', () => { $('tDur').textContent = fmtTime(songEl.duration); });
+function updateSeek(){
+  if (seeking || !songEl.src || !isFinite(songEl.duration)) return;
+  $('seek').value = Math.round(songEl.currentTime/songEl.duration*1000);
+  $('tCur').textContent = fmtTime(songEl.currentTime);
+}
+$('vol').addEventListener('input', () => { if (songGain) songGain.gain.value = +$('vol').value/100; });
+$('stopSongBtn').onclick = () => {
+  if (!songEl.src) return;
+  songEl.pause(); songEl.currentTime = 0; $('playBtn').textContent = '▶ Play'; updateSeek();
+};
+$('stopSpinBtn').onclick = () => {
+  spinStopped = !spinStopped;
+  $('stopSpinBtn').textContent = spinStopped ? '▶ Start Spin' : '⏸ Stop Spin';
+  $('stopSpinBtn').classList.toggle('active', spinStopped);
 };
 $('playBtn').onclick = () => {
   if (!songEl.src){ alert('Load a song first.'); return; }
@@ -1048,6 +1089,7 @@ function animFrame(now){
   if (!visible && !recording) return;
   try {
     updateAudio(dt);
+    updateSeek();
     const react = +$('react').value/100;
     const flow  = +$('flow').value/100;
     const spin  = +$('spin').value/100;
@@ -1062,11 +1104,11 @@ function animFrame(now){
     animT += dt*timeRate;
 
     // spin follows melody/vocals (mids), image turn follows cymbals (highs)
-    const spinTarget = spin*0.8*(1 + flow*(1.5*G.mid - 0.4)) + dir*react*0.35*G.pulse;
+    const spinTarget = spinStopped ? 0 : spin*0.8*(1 + flow*(1.5*G.mid - 0.4)) + dir*react*0.35*G.pulse;
     rotVel = ease(rotVel, spinTarget, dt, 1.0, 1.4);
     rot += rotVel*dt;
     const turn = +$('turn').value/100;
-    turnVel = ease(turnVel, turn*0.8*(1 + flow*(1.4*G.high - 0.35)), dt, 1.0, 1.4);
+    turnVel = ease(turnVel, spinStopped ? 0 : turn*0.8*(1 + flow*(1.4*G.high - 0.35)), dt, 1.0, 1.4);
     imgRot += turnVel*dt;
 
     // beat waves roll outward from the center
@@ -1149,7 +1191,8 @@ function startRecording(){
   if (recLenMode === 'song' && !recWithSong){
     alert('"Whole song" needs a song loaded (and the mic turned off). Using 30 seconds instead.');
   }
-  recLimit = recLenMode === 'song' ? (recWithSong && isFinite(songEl.duration) ? songEl.duration + 0.5 : 30) : +recLenMode;
+  const startAt = recWithSong ? ($('recFrom').value === 'here' ? songEl.currentTime : 0) : 0;
+  recLimit = recLenMode === 'song' ? (recWithSong && isFinite(songEl.duration) ? songEl.duration - startAt + 0.5 : 30) : +recLenMode;
 
   recStream = animCanvas.captureStream(30);
   if (recWithSong){ ensureAudio(); recDest.stream.getAudioTracks().forEach(t => recStream.addTrack(t)); }
@@ -1168,11 +1211,21 @@ function startRecording(){
       : '✅ Done! Saved as a WebM video (this browser cannot make MP4 — use Chrome or Edge for MP4).';
     recStream.getVideoTracks().forEach(t => t.stop());
   };
-  if (recWithSong){ songEl.currentTime = 0; songEl.play().catch(() => {}); $('playBtn').textContent = '⏸ Pause'; }
-  recorder.start(1000);
-  recStart = performance.now(); recording = true;
-  $('recBtn').textContent = '⏹ Stop Recording';
-  $('outSize').disabled = true;
+  const begin = () => {
+    recorder.start(1000);
+    recStart = performance.now(); recording = true;
+    $('recBtn').textContent = '⏹ Stop Recording'; $('recBtn').disabled = false;
+    lockControls(true);
+  };
+  $('recBtn').disabled = true;
+  if (recWithSong){
+    songEl.pause(); songEl.currentTime = startAt;
+    songEl.play().then(() => { $('playBtn').textContent = '⏸ Pause'; begin(); })
+                 .catch(() => { $('recBtn').disabled = false; alert('The song could not be started.'); });
+  } else begin();
+}
+function lockControls(on){
+  for (const id of ['outSize','playBtn','stopSongBtn','seek','micBtn','songFile','recFrom','vidLen','incAudio']) $(id).disabled = on;
 }
 function stopRecording(){
   if (!recording) return;
@@ -1180,7 +1233,7 @@ function stopRecording(){
   try { recorder.stop(); } catch(err){}
   if (recWithSong){ songEl.pause(); $('playBtn').textContent = '▶ Play'; }
   $('recBtn').textContent = '⏺ Record Video';
-  $('outSize').disabled = false;
+  lockControls(false);
   $('recStatus').textContent = 'Saving your video…';
 }
 $('recBtn').onclick = () => recording ? stopRecording() : startRecording();
