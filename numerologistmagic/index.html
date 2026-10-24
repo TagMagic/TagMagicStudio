@@ -291,6 +291,8 @@ table.cal td.day:hover,table.cal td.day:focus{outline:2px solid var(--wine);outl
 .pdfbox .small{font-size:16px;color:var(--muted)}
 .pdfwiz{width:90px}
 
+.promo{text-align:center;font-size:13px;color:var(--ink2);margin-top:10px;letter-spacing:.3px}
+
 /* ---------- Trial bar & purchase window ---------- */
 .trialbar{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 18px;font-size:17px;color:var(--muted)}
 .trialbar b{color:var(--gold2)}
@@ -322,7 +324,12 @@ table.cal td.day:hover,table.cal td.day:focus{outline:2px solid var(--wine);outl
 .terms p{margin:8px 0}
 
 /* ---------- Print ---------- */
-@page{size:letter;margin:0.55in 0.6in}
+/* Page-number margin box: also tells modern Chrome/Edge to leave out the browser's own date/URL headers and footers */
+@page{size:letter;margin:0.55in 0.6in;
+  @top-left{content:""} @top-center{content:""} @top-right{content:""}
+  @bottom-left{content:""} @bottom-right{content:""}
+  @bottom-center{content:"Page " counter(page) " of " counter(pages);font-family:Georgia,serif;font-size:8pt;color:#8c7864}
+}
 @media print{
   body{background:#fff !important;color:#000;font-size:12.5pt}
   .no-print,header.hero,.tagline,.tabs,.panel,.report-toolbar,footer{display:none !important}
@@ -795,7 +802,8 @@ function monthTable(py, Y, showTags){
   }
   return `<table class="months"><thead><tr><th>Month</th><th style="text-align:center">No.</th><th>Guidance for ${Y}</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
-function closing(){ return `<div class="closing">Numbers describe tendencies and timing, not fate. Use this reading as a guide, and let your own heart and good sense make the final call.</div>`; }
+function closing(){ return `<div class="closing">Numbers describe tendencies and timing, not fate. Use this reading as a guide, and let your own heart and good sense make the final call.</div>`
+  + (isLicensed() ? "" : `<div class="promo">Created with NumerologistMagic &middot; tagmagicstudio.com/numerologistmagic</div>`); }
 
 /* ---------- In-depth interpretation content ---------- */
 const DEEP = {
