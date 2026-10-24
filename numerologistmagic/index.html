@@ -250,6 +250,26 @@ table.cal .dn{font-family:'Cinzel',Georgia,serif;font-weight:700;font-size:18px;
 table.cal .dh{font-size:11.5px;text-align:center;line-height:1.15;color:var(--ink)}
 @media (max-width:700px){ table.cal .dh{font-size:9.5px} table.cal td{height:62px;padding:2px} table.glance{min-width:640px} }
 
+table.cal td.day{cursor:pointer;transition:outline .1s}
+table.cal td.day:hover,table.cal td.day:focus{outline:2px solid var(--wine);outline-offset:-2px}
+.caltip{font-style:italic;color:var(--ink2);margin:-4px 0 8px}
+.mblock .mt .cn{width:34px;height:34px;font-size:16px}
+.daymodal{max-width:520px}
+.dayhead{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.cn.big{width:58px;height:58px;font-size:26px;border-radius:12px}
+.daydate{color:var(--muted);font-size:16px}
+.daymodal h2{text-align:left;margin:0;font-size:22px}
+.daymodal p{margin:8px 0}
+.daymodal .blend{font-style:italic;color:var(--gold2)}
+.daylines{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin-top:10px;font-size:16.5px}
+.daylines b{display:block;font-family:'Cinzel',Georgia,serif;font-size:12.5px;letter-spacing:.6px;color:var(--gold);text-transform:uppercase}
+@media (max-width:560px){ .daylines{grid-template-columns:1fr} }
+.guide .mblock{padding:7px 0 5px}
+.guide .mblock p{margin:4px 0 2px;font-size:16px}
+.guide .lines{grid-template-columns:1fr 1fr 1fr;gap:3px 16px;font-size:14.5px;margin:4px 0 2px}
+@media (max-width:700px){ .guide .lines{grid-template-columns:1fr} }
+@media print{ table.cal td.day, table.cal td.day:hover, table.cal td.day:focus{cursor:default;outline:none} .guide .mblock p{font-size:11.5pt} .guide .lines{font-size:10.5pt} }
+
 /* ---------- Trial bar & purchase window ---------- */
 .trialbar{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 18px;font-size:17px;color:var(--muted)}
 .trialbar b{color:var(--gold2)}
@@ -411,6 +431,14 @@ table.cal .dh{font-size:11.5px;text-align:center;line-height:1.15;color:var(--in
       </div>
       <div class="keymsg" id="keyMsg"></div>
       <p style="text-align:center;margin:12px 0 0"><button class="linkbtn" data-terms>License terms</button></p>
+    </div>
+  </div>
+
+  <div class="modal-bg no-print" id="dayModal" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
+    <div class="modal daymodal">
+      <button class="close" data-close aria-label="Close">&times;</button>
+      <div id="dayBody"></div>
+      <p style="text-align:center;margin:14px 0 0"><button class="btn ghost" data-close>Close</button></p>
     </div>
   </div>
 
@@ -1108,25 +1136,43 @@ function monthCalendar(py, Y, mi){
   let cells=""; for(let i=0;i<first;i++) cells+=`<td class="empty"></td>`;
   for(let d=1; d<=days; d++){
     const n=personalDay(pm,d);
-    cells+=`<td class="${PDC[n]}"><div class="dt">${d}</div><div class="dn">${n}</div><div class="dh">${PDS[n]}</div></td>`;
+    cells+=`<td class="${PDC[n]} day" tabindex="0" role="button" data-y="${Y}" data-mi="${mi}" data-d="${d}" data-pd="${n}" data-pm="${pm}"><div class="dt">${d}</div><div class="dn">${n}</div><div class="dh">${PDS[n]}</div></td>`;
     if((first+d)%7===0 && d<days) cells+=`</tr><tr>`;
   }
   const tail=(7-(first+days)%7)%7; for(let i=0;i<tail;i++) cells+=`<td class="empty"></td>`;
   return `<div class="calmonth"><div class="calhead">${badge(pm)}<div><h3>${MONTHS[mi]} ${Y}</h3><div class="sub">Personal Month ${pm} &mdash; ${QP[pm].charAt(0).toUpperCase()+QP[pm].slice(1)}</div></div></div>
   <table class="cal"><thead><tr>${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(w=>`<th>${w}</th>`).join("")}</tr></thead><tbody><tr>${cells}</tr></tbody></table></div>`;
 }
-function glanceSection(py, Y, months){
-  if(!months || !months.length) return "";
-  return `<h2>Your ${Y} at a Glance</h2>
-  <p>Every day has its own number, called the Personal Day, found by adding the calendar day to your Personal Month. Use it to pick the best days for first dates, important meetings, big purchases, rest and new beginnings.</p>
-  ${glanceChart(py,Y)}
-  <p class="calc">Each square is one day of ${Y}. Find a month on the left and a date across the top; the color shows what kind of day it is.</p>
-  <h3>What Each Day's Number Means</h3>${calKey()}`;
+const DAYX = {
+1:{title:"Day of New Beginnings",theme:"A day for starting things. Your energy and confidence are high, so take the first step on anything you have been putting off. Decisions made today tend to set things in motion quickly.",love:"Make the first move: ask someone out, plan a date or say what you feel.",work:"Launch a project, pitch an idea or apply for something new.",money:"Good for opening accounts or starting a savings plan; avoid rash big purchases.",health:"Start a new routine or exercise plan.",best:"Starting, deciding, leading, first meetings",avoid:"Waiting for others to act, or needing their approval"},
+2:{title:"Day of Cooperation",theme:"A quieter, gentler day. Things move through partnership and patience rather than force. Pay attention to details, feelings and the people around you.",love:"Wonderful for closeness, heartfelt talks and small kindnesses.",work:"Collaborate, negotiate and smooth things over. Let others take the lead.",money:"Hold steady; review details and shared finances.",health:"Rest, gentle activity and calm surroundings.",best:"Teamwork, negotiations, romance, listening",avoid:"Pushing, confrontations, rushing decisions"},
+3:{title:"Day of Joy and Expression",theme:"A light, social, creative day. Conversations flow, ideas come easily and people enjoy your company. Let yourself have some fun.",love:"Flirt, laugh, go out. Great for parties and fun dates.",work:"Write, speak, present, promote and network.",money:"Easy to overspend, so enjoy yourself within a budget.",health:"Laughter and creative play lift your energy.",best:"Socializing, creative work, communication, celebrations",avoid:"Heavy, serious tasks, gossip, scattering your energy"},
+4:{title:"Day of Work and Order",theme:"A practical, productive day. Roll up your sleeves, get organized and handle the details. Steady effort today pays off later.",love:"Show love through actions: help out, fix things, make plans together.",work:"Paperwork, planning, organizing and catching up.",money:"Budget, pay bills and review your finances.",health:"Stick to your routine; good for checkups and steady exercise.",best:"Organizing, paperwork, repairs, planning, steady work",avoid:"Shortcuts, risky ventures, procrastination"},
+5:{title:"Day of Change",theme:"A lively, unpredictable day. Expect surprises and changes of plan. Stay flexible, be curious and say yes to something different.",love:"Spontaneous dates and surprises; a good day to meet new people.",work:"Sell, promote, travel and try a new approach.",money:"Opportunities appear quickly, but think before you spend.",health:"Get moving, and avoid overindulging.",best:"Travel, sales, new experiences, variety, adventure",avoid:"Rigid schedules, signing long commitments, impulsive excess"},
+6:{title:"Day of Love and Home",theme:"A warm day centered on family, home and the people you love. Others may need your help or advice, and beauty and comfort matter today.",love:"One of the best days for romance, commitment and family time.",work:"Service, teaching, helping others and creating beauty.",money:"Spending on home and family; good for household purchases.",health:"Nourishing food, comfort, and caring for yourself too.",best:"Romance, family gatherings, home projects, helping others",avoid:"Meddling, taking on everyone else's problems"},
+7:{title:"Day of Reflection",theme:"A quiet, inward day. Slow down, think things through and trust your intuition. Outer results may come slowly, so don't force them.",love:"Deep, honest conversation; it is also fine to enjoy time alone.",work:"Research, study, analyze and plan rather than launch.",money:"Review and research; avoid major money moves.",health:"Rest, meditation and time in nature.",best:"Study, research, rest, meditation, planning",avoid:"Big launches, crowds, forcing decisions"},
+8:{title:"Day of Power and Achievement",theme:"A strong day for business, money and authority. Act with confidence, make big decisions and ask for what you are worth.",love:"Make time for love despite a busy day; good for practical plans together.",work:"Negotiate, close deals and meet with people in authority.",money:"Strong financial energy for investments, raises and large purchases.",health:"Watch stress, and schedule a break.",best:"Business, finances, negotiations, important decisions",avoid:"Carelessness with money, power struggles"},
+9:{title:"Day of Completion",theme:"A day for finishing and letting go. Tie up loose ends, clear out clutter and forgive what still weighs on you. Generosity brings blessings.",love:"Heal old hurts, apologize, or let go of what isn't working.",work:"Finish projects, wrap things up and clear your desk.",money:"Pay off small debts, donate and settle accounts.",health:"Release stress; rest and reflect.",best:"Finishing, cleaning out, charity, forgiveness",avoid:"Starting major new projects, holding grudges"},
+11:{title:"Day of Inspiration (Master Number)",theme:"A heightened day of intuition and inspiration. Insights come quickly, and you may sense things before they happen. Trust your inner voice, but take care of your nerves.",love:"Soulful connection; trust your feelings about people.",work:"Inspire, teach, and share ideas and creative vision.",money:"Keep things simple and double-check the details.",health:"Protect your nerves with quiet and rest.",best:"Spiritual practice, creative ideas, intuition, inspiring others",avoid:"Overthinking, stressful situations, ignoring your hunches"},
+22:{title:"Day of the Master Builder (Master Number)",theme:"A powerful day for turning big ideas into reality. Think large, but act practically, one step at a time.",love:"Build something together: plans for a home or a shared future.",work:"Major projects, big plans and large-scale progress.",money:"Long-term investments and lasting purchases.",health:"Pace yourself; don't take on everything at once.",best:"Big projects, long-range planning, building, leadership",avoid:"Thinking small, cutting corners, burning out"}
+};
+function dayGuide(){
+  return [1,2,3,4,5,6,7,8,9,11,22].map(n=>{ const D=DAYX[n];
+    return `<div class="mblock"><div class="mt"><span class="cn ${PDC[n]}">${n}</span><h3>${D.title}</h3></div><p>${D.theme}</p>
+    ${lifeLines(D,[["love","Love"],["work","Work"],["money","Money"],["health","Health"],["best","Best for"],["avoid","Avoid"]])}</div>`; }).join("");
+}
+function dayBlend(n, m){
+  return `This ${n} day falls in your Personal Month ${m}, a month of ${QP[m]}. ` + (base(n)===base(m)
+    ? "The day and the month share the same energy, so today's theme is especially strong."
+    : `Let today's focus on ${QP[n]} support the month's larger theme.`);
 }
 function calendarSection(py, Y, months){
   if(!months || !months.length) return "";
-  return `<h2 class="page-break">Your Daily Calendar for ${Y}</h2>
-  <p>Each day shows its date, its Personal Day number and a short hint. The colors match the key in "Your ${Y} at a Glance" at the front of this report.</p>
+  return `<h2 class="page-break">Your Daily Guide for ${Y}</h2>
+  <p>Every day has its own number, called the Personal Day, found by adding the calendar day to your Personal Month. There are eleven possible day numbers. Find a day's number on the calendar that follows, then read its full meaning here.</p>
+  <div class="guide">${dayGuide()}</div>
+  <h2 class="page-break">Your Daily Calendar for ${Y}</h2>
+  <p class="no-print caltip">&#10022; Tip: click any day on the calendar to open its full reading.</p>
   <div class="calgrid">${months.map(mi=>monthCalendar(py,Y,mi)).join("")}</div>`;
 }
 
@@ -1135,7 +1181,6 @@ function yearlyReport(p, Y, calMonths){
   const P=profile(p), py=personalYear(p.m,p.d,Y), uy=universalYear(Y), X=extras(p,P,Y), Y5=PYX[py.n];
   return head("Yearly Numerology Report", `Prepared for <b>${esc(displayName(p.name))}</b>`, `<span>Born ${fmtDate(p)}</span><span>&nbsp;&middot;&nbsp; Year of ${Y}</span>`)
   + `<h2>Your Core Numbers</h2>` + coreGrid(P) + extrasGrid(X)
-  + glanceSection(py.n, Y, calMonths)
   + howFound()
   + `<h2 class="page-break">${Y}: Personal Year ${py.n}</h2>`
   + `<div class="meaning"><div class="mh">${badge(py.n)}<div><h3>Personal Year ${py.n} &mdash; ${N[py.n].kw}</h3><div class="sub">Your theme from January through December ${Y}</div></div></div>
@@ -1417,6 +1462,18 @@ recheckLicense();
   try{ history.replaceState(null,"",location.pathname); }catch(e){}
   openBuy(); document.getElementById("keyInput").value=normKey(k); onActivate();
 })();
+
+/* Click a calendar day for its full reading */
+function openDay(td){
+  const Y=+td.dataset.y, mi=+td.dataset.mi, d=+td.dataset.d, n=+td.dataset.pd, m=+td.dataset.pm, D=DAYX[n];
+  const wd=new Date(Y,mi,d).toLocaleDateString("en-US",{weekday:"long"});
+  document.getElementById("dayBody").innerHTML=`<div class="dayhead"><span class="cn ${PDC[n]} big">${n}</span><div><div class="daydate">${wd}, ${MONTHS[mi]} ${d}, ${Y}</div><h2 id="dayTitle">${D.title}</h2></div></div>
+    <p>${D.theme}</p><p class="blend">${dayBlend(n,m)}</p>
+    <div class="daylines">${[["Love",D.love],["Work",D.work],["Money",D.money],["Health",D.health],["Best for",D.best],["Avoid",D.avoid]].map(([l,v])=>`<div><b>${l}</b>${v}</div>`).join("")}</div>`;
+  openModal("dayModal");
+}
+document.getElementById("report").addEventListener("click",e=>{ const td=e.target.closest("td.day"); if(td) openDay(td); });
+document.getElementById("report").addEventListener("keydown",e=>{ const td=e.target.closest("td.day"); if(td && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); openDay(td); } });
 
 /* Enter key creates the report */
 document.querySelectorAll(".panel input").forEach(i=>i.addEventListener("keydown",e=>{
