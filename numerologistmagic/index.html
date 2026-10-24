@@ -105,7 +105,9 @@ input:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 
   background-image:var(--wizimg);background-size:contain;background-repeat:no-repeat;opacity:.07;pointer-events:none;
 }
 .rpt-head{text-align:center;border-bottom:2px solid var(--rule);padding-bottom:16px;margin-bottom:22px}
-.rpt-head img{width:300px;max-width:70%}
+.rpt-brand{display:flex;align-items:center;justify-content:center;gap:10px}
+.rpt-brand .rwiz{width:92px;height:auto}
+.rpt-brand .rlogo{width:300px;max-width:62%;height:auto}
 .rpt-title{font-family:'Cinzel',Georgia,serif;font-size:28px;margin:6px 0 2px;color:var(--wine);letter-spacing:1px}
 .rpt-for{font-size:22px;margin:4px 0}
 .rpt-meta{color:var(--ink2);font-size:16px}
@@ -729,7 +731,7 @@ function prepBy(){ const v=document.getElementById("prepBy").value.trim(); retur
 
 function head(title, forLine, metaHtml){
   return `<div class="rpt-head">
-    <img src="${LOGO}" alt="NumerologistMagic">
+    <div class="rpt-brand"><img class="rwiz" src="${document.querySelector('.hero .wiz').src}" alt=""><img class="rlogo" src="${LOGO}" alt="NumerologistMagic"></div>
     <div class="rpt-title">${title}</div>
     <div class="rpt-for">${forLine}</div>
     <div class="rpt-meta">${metaHtml}<span>&nbsp;&middot;&nbsp; Prepared ${today()}</span>${prepBy()}</div>
