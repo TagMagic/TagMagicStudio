@@ -1354,7 +1354,7 @@ const isLicensed = () => !!store.get("nm_license");
 function renderTrial(){
   const bar=document.getElementById("trialbar");
   if(isLicensed()){
-    bar.innerHTML=`<span class="lic">&#10004; Licensed &mdash; unlimited reports with full resale rights</span><button class="linkbtn" data-terms>License terms</button>`;
+    bar.innerHTML=`<span class="lic">&#10004; Licensed</span><span class="lic">&mdash;</span><button class="linkbtn" data-terms>License Terms</button>`;
   } else {
     const left=trialLeft();
     bar.innerHTML = (left>0
