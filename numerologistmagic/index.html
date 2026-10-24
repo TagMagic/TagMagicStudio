@@ -217,6 +217,39 @@ tr.now td{background:#f9e7b8;-webkit-print-color-adjust:exact;print-color-adjust
 .twocol{margin:8px 0}
 @media (max-width:700px){ .lines{grid-template-columns:1fr} table.chart th,table.chart td{width:30px} }
 
+/* ---------- Daily calendar ---------- */
+.calopts .optlabel{font-size:15px;color:var(--muted);letter-spacing:.3px;display:block;margin-bottom:6px}
+.radios,.monthpicks{display:flex;flex-wrap:wrap;gap:8px 18px}
+.radios label,.monthpicks label{display:flex;align-items:center;gap:6px;font-size:18px;color:var(--text);cursor:pointer}
+.radios input,.monthpicks input{width:18px;height:18px;accent-color:var(--gold)}
+.monthpicks{margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#120a22}
+.monthpicks label{flex:0 0 130px}
+.biz{background:#f6d58a}.love{background:#f6cfc4}.soc{background:#f3ecb0}.work{background:#e3d6bf}.rest{background:#ddd3ee}.rel{background:#cfe0e6}
+.biz,.love,.soc,.work,.rest,.rel{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.calkey{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 14px;margin:6px 0 14px;font-size:15.5px}
+.ck{display:flex;align-items:center;gap:8px}
+.cn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-family:'Cinzel',Georgia,serif;font-weight:700;font-size:14px;color:var(--ink);border:1px solid #c9a96a;flex:0 0 auto}
+.glancewrap{overflow-x:auto;margin:6px 0 4px}
+table.glance{border-collapse:collapse;width:100%;font-family:'Cinzel',Georgia,serif;font-size:11px;table-layout:fixed;break-inside:avoid}
+table.glance th,table.glance td{border:1px solid #d9c38f;text-align:center;padding:3px 0;height:22px}
+table.glance th{font-size:9.5px;color:var(--ink2);background:var(--parch2);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+table.glance th.mn{width:38px;font-size:11px;color:var(--wine)}
+table.glance td{font-weight:700;color:var(--ink)}
+table.glance td.none{background:#efe6cf}
+.calgrid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:14px}
+.calmonth{break-inside:avoid}
+.calhead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.calhead .badge{width:40px;height:40px;font-size:18px;margin:0;flex:0 0 auto}
+.calhead h3{margin:0}.calhead .sub{font-size:15px;color:var(--ink2);font-style:italic}
+table.cal{width:100%;border-collapse:collapse;table-layout:fixed}
+table.cal th{font-family:'Cinzel',Georgia,serif;font-size:12px;color:var(--ink2);padding:4px 0;border-bottom:1px solid var(--rule)}
+table.cal td{border:1px solid #d9c38f;vertical-align:top;height:58px;padding:3px 5px;position:relative}
+table.cal td.empty{background:transparent;border-color:#eadfc2}
+table.cal .dt{font-size:12px;color:var(--ink2)}
+table.cal .dn{font-family:'Cinzel',Georgia,serif;font-weight:700;font-size:18px;color:var(--wine);text-align:center;line-height:1.1}
+table.cal .dh{font-size:11.5px;text-align:center;line-height:1.15;color:var(--ink)}
+@media (max-width:700px){ table.cal .dh{font-size:9.5px} table.cal td{height:62px;padding:2px} table.glance{min-width:640px} }
+
 /* ---------- Trial bar & purchase window ---------- */
 .trialbar{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 18px;font-size:17px;color:var(--muted)}
 .trialbar b{color:var(--gold2)}
@@ -288,7 +321,15 @@ tr.now td{background:#f9e7b8;-webkit-print-color-adjust:exact;print-color-adjust
       <div class="row" style="margin-top:10px" id="y-date"></div>
       <div class="row" style="margin-top:10px">
         <div class="field small"><label for="y-year">Report year</label><input id="y-year" type="number" min="1900" max="2200"></div>
-        <div class="field" style="flex:0 1 280px"><label for="y-day">Day-by-day guide (optional)</label><select id="y-day"><option value="-1">No daily guide</option></select></div>
+      </div>
+      <div class="calopts" style="margin-top:12px">
+        <label class="optlabel">Daily calendar</label>
+        <div class="radios">
+          <label><input type="radio" name="calmode" value="none" checked> No daily calendar</label>
+          <label><input type="radio" name="calmode" value="year"> Entire year</label>
+          <label><input type="radio" name="calmode" value="pick"> Choose months</label>
+        </div>
+        <div class="monthpicks" id="monthpicks" hidden></div>
       </div>
     </div>
     <div class="actions">
@@ -1042,22 +1083,59 @@ function keyMonths(py){
   if(demand.length) out.push(`<span class="chip">Months that ask more of you: ${listWords(demand)}</span>`);
   return `<div class="focus">${out.join("")}</div>`;
 }
-function dayTable(py, Y, mi){
-  const pm=personalMonth(py,mi), days=new Date(Y,mi+1,0).getDate(); let rows="";
-  for(let d=1; d<=days; d++){
-    const pd=reduce(base(pm)+reduce(d,false));
-    const wd=new Date(Y,mi,d).toLocaleDateString("en-US",{weekday:"short"});
-    rows+=`<tr><td class="m">${wd} ${d}</td><td class="n">${pd}</td><td>${PD[pd]}${romanceTag(pd)}</td></tr>`;
+/* ---------- Daily calendars ---------- */
+const PDS = {1:"Start new",2:"Partner up",3:"Socialize",4:"Work hard",5:"Change",6:"Love &amp; home",7:"Rest &amp; reflect",8:"Business",9:"Finish up",11:"Intuition",22:"Build big"};
+const PDC = {1:"biz",8:"biz",22:"biz",2:"love",6:"love",11:"love",3:"soc",5:"soc",4:"work",7:"rest",9:"rel"};
+const personalDay = (pm,d) => reduce(base(pm)+reduce(d,false));
+function calKey(){
+  const order=[1,2,3,4,5,6,7,8,9,11,22];
+  return `<div class="calkey">${order.map(n=>`<div class="ck"><span class="cn ${PDC[n]}">${n}</span><span>${PD[n]}</span></div>`).join("")}</div>`;
+}
+function glanceChart(py, Y){
+  let head=`<tr><th></th>${[...Array(31).keys()].map(i=>`<th>${i+1}</th>`).join("")}</tr>`, body="";
+  for(let mi=0; mi<12; mi++){
+    const pm=personalMonth(py,mi), days=new Date(Y,mi+1,0).getDate(); let cells="";
+    for(let d=1; d<=31; d++){
+      if(d>days){ cells+=`<td class="none"></td>`; continue; }
+      const n=personalDay(pm,d); cells+=`<td class="${PDC[n]}">${n}</td>`;
+    }
+    body+=`<tr><th class="mn">${MONTHS[mi].slice(0,3)}</th>${cells}</tr>`;
   }
-  return `<p>${MONTHS[mi]} is your Personal Month ${pm}. Each day has its own number as well, found by adding the calendar day to your Personal Month. Use it to choose the best days for important plans.</p>
-  <table class="months"><thead><tr><th>Day</th><th style="text-align:center">No.</th><th>Best used for</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return `<div class="glancewrap"><table class="glance"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+}
+function monthCalendar(py, Y, mi){
+  const pm=personalMonth(py,mi), days=new Date(Y,mi+1,0).getDate(), first=new Date(Y,mi,1).getDay();
+  let cells=""; for(let i=0;i<first;i++) cells+=`<td class="empty"></td>`;
+  for(let d=1; d<=days; d++){
+    const n=personalDay(pm,d);
+    cells+=`<td class="${PDC[n]}"><div class="dt">${d}</div><div class="dn">${n}</div><div class="dh">${PDS[n]}</div></td>`;
+    if((first+d)%7===0 && d<days) cells+=`</tr><tr>`;
+  }
+  const tail=(7-(first+days)%7)%7; for(let i=0;i<tail;i++) cells+=`<td class="empty"></td>`;
+  return `<div class="calmonth"><div class="calhead">${badge(pm)}<div><h3>${MONTHS[mi]} ${Y}</h3><div class="sub">Personal Month ${pm} &mdash; ${QP[pm].charAt(0).toUpperCase()+QP[pm].slice(1)}</div></div></div>
+  <table class="cal"><thead><tr>${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(w=>`<th>${w}</th>`).join("")}</tr></thead><tbody><tr>${cells}</tr></tbody></table></div>`;
+}
+function glanceSection(py, Y, months){
+  if(!months || !months.length) return "";
+  return `<h2>Your ${Y} at a Glance</h2>
+  <p>Every day has its own number, called the Personal Day, found by adding the calendar day to your Personal Month. Use it to pick the best days for first dates, important meetings, big purchases, rest and new beginnings.</p>
+  ${glanceChart(py,Y)}
+  <p class="calc">Each square is one day of ${Y}. Find a month on the left and a date across the top; the color shows what kind of day it is.</p>
+  <h3>What Each Day's Number Means</h3>${calKey()}`;
+}
+function calendarSection(py, Y, months){
+  if(!months || !months.length) return "";
+  return `<h2 class="page-break">Your Daily Calendar for ${Y}</h2>
+  <p>Each day shows its date, its Personal Day number and a short hint. The colors match the key in "Your ${Y} at a Glance" at the front of this report.</p>
+  <div class="calgrid">${months.map(mi=>monthCalendar(py,Y,mi)).join("")}</div>`;
 }
 
 /* ---------- Report builders ---------- */
-function yearlyReport(p, Y, dayMonth){
+function yearlyReport(p, Y, calMonths){
   const P=profile(p), py=personalYear(p.m,p.d,Y), uy=universalYear(Y), X=extras(p,P,Y), Y5=PYX[py.n];
   return head("Yearly Numerology Report", `Prepared for <b>${esc(displayName(p.name))}</b>`, `<span>Born ${fmtDate(p)}</span><span>&nbsp;&middot;&nbsp; Year of ${Y}</span>`)
   + `<h2>Your Core Numbers</h2>` + coreGrid(P) + extrasGrid(X)
+  + glanceSection(py.n, Y, calMonths)
   + howFound()
   + `<h2 class="page-break">${Y}: Personal Year ${py.n}</h2>`
   + `<div class="meaning"><div class="mh">${badge(py.n)}<div><h3>Personal Year ${py.n} &mdash; ${N[py.n].kw}</h3><div class="sub">Your theme from January through December ${Y}</div></div></div>
@@ -1068,11 +1146,11 @@ function yearlyReport(p, Y, dayMonth){
   + `<h3>Season by Season</h3>` + seasons(py.n)
   + `<h3>Key Months</h3>` + keyMonths(py.n)
   + `<h2>Month by Month</h2>` + monthBlocks(py.n)
-  + (dayMonth>=0 ? `<h2>Day by Day: ${MONTHS[dayMonth]} ${Y}</h2>` + dayTable(py.n,Y,dayMonth) : "")
   + `<h2 class="page-break">Your Numbers in Depth</h2>` + inDepth(P)
   + karmicSection(X)
   + pinnacleSection(p, X)
   + loveSection(P)
+  + calendarSection(py.n, Y, calMonths)
   + closing();
 }
 
@@ -1248,7 +1326,16 @@ function buildDate(containerId, prefix){
   <div class="field small"><label for="${prefix}-y">Year</label><input id="${prefix}-y" type="number" min="1850" max="2200" placeholder="e.g. 1962"></div>`;
 }
 ["y","a","b","s"].forEach(p=>buildDate(p+"-date",p));
-document.getElementById("y-day").insertAdjacentHTML("beforeend", MONTHS.map((m,i)=>`<option value="${i}">${m}</option>`).join(""));
+document.getElementById("monthpicks").innerHTML = MONTHS.map((m,i)=>`<label><input type="checkbox" value="${i}"> ${m}</label>`).join("");
+document.querySelectorAll('input[name="calmode"]').forEach(r=>r.addEventListener("change",()=>{
+  document.getElementById("monthpicks").hidden = document.querySelector('input[name="calmode"]:checked').value!=="pick";
+}));
+function readCalendar(){
+  const mode=document.querySelector('input[name="calmode"]:checked').value;
+  if(mode==="year") return [0,1,2,3,4,5,6,7,8,9,10,11];
+  if(mode==="pick") return [...document.querySelectorAll('#monthpicks input:checked')].map(c=>+c.value);
+  return [];
+}
 const now=new Date(), defYear = now.getMonth()>=9 ? now.getFullYear()+1 : now.getFullYear();
 ["y-year","c-year","s-year"].forEach(id=>document.getElementById(id).value=defYear);
 
@@ -1276,7 +1363,9 @@ function generate(kind){
     if(kind==="yearly"){
       const p=readPerson("y","y-name"); if(p.err) return err.textContent=p.err;
       const Y=readYear("y-year"); if(!Y) return err.textContent="Please enter a report year.";
-      show(yearlyReport(p,Y,+document.getElementById("y-day").value));
+      const cal=readCalendar();
+      if(document.querySelector('input[name="calmode"]:checked').value==="pick" && !cal.length) return err.textContent="Please check at least one month for the daily calendar.";
+      show(yearlyReport(p,Y,cal));
     } else if(kind==="couple"){
       const a=readPerson("a","a-name"); if(a.err) return err.textContent="First person: "+a.err;
       const b=readPerson("b","b-name"); if(b.err) return err.textContent="Second person: "+b.err;
