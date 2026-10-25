@@ -328,6 +328,13 @@ button{font-family:inherit}
   background:linear-gradient(180deg,#ffd98a,#ffb02e 60%,#d98a1c);color:#3a1a00;box-shadow:0 5px 0 #7a4a10, 0 8px 14px rgba(0,0,0,.4)}
 .go:active{transform:translateY(3px);box-shadow:0 2px 0 #7a4a10}
 
+@media (min-width:961px){
+  .panel{align-items:stretch}
+  .scopeBox,.center{align-self:start}
+  .right{grid-template-rows:auto auto 1fr}
+  .right .fader{margin-top:26px}
+  .right .timeCell{align-self:end;margin-bottom:20px}
+}
 /* ---------- Responsive ---------- */
 @media (max-width:960px){
   .panel{grid-template-columns:1fr 1fr}
@@ -443,20 +450,20 @@ button{font-family:inherit}
           </div>
         </div>
 
-        <div class="knobWrap">
+        <div class="knobWrap fader">
           <div class="vsl" id="sVol" tabindex="0" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100">
             <div class="track"></div><div class="fill"></div><div class="ticks"></div><div class="handle"></div>
           </div>
           <div class="lbl">Volume</div><div class="val" id="vVol">25</div>
         </div>
-        <div class="knobWrap">
+        <div class="knobWrap fader">
           <div class="vsl dim" id="sBeat" tabindex="0" role="slider" aria-label="Binaural beat rate" aria-valuemin="0.5" aria-valuemax="40">
             <div class="track"></div><div class="fill"></div><div class="ticks"></div><div class="handle"></div>
           </div>
           <div class="lbl">Beat</div><div class="val" id="vBeat">10.0 Hz · Alpha</div>
         </div>
 
-        <div class="span2 knobWrap">
+        <div class="span2 knobWrap timeCell">
           <div class="timeWin" id="timeLeft">--:--</div>
           <div class="sub">TIME LEFT</div>
         </div>
