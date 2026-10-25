@@ -287,11 +287,21 @@ button{font-family:inherit}
     radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.35), transparent 50%),
     radial-gradient(ellipse at 90% 100%, rgba(150,100,40,.18), transparent 60%),
     var(--paper);
-  color:var(--ink);border-radius:6px;padding:30px 36px 26px;
-  box-shadow:0 18px 40px rgba(0,0,0,.6), inset 0 0 60px rgba(150,100,40,.18);
-  transform:rotate(-.25deg);
+  color:var(--ink);border-radius:12px;padding:34px 40px 30px;
+  border:6px solid #3a1f0c;
+  box-shadow:
+    inset 0 0 0 2px #6b4420,
+    inset 0 0 0 4px rgba(255,220,160,.35),
+    inset 0 0 60px rgba(150,100,40,.18),
+    0 18px 40px rgba(0,0,0,.6),
+    0 0 0 2px #120801;
 }
-.guide::before{content:"TONE GUIDE";position:absolute;top:-14px;left:28px;font-family:'Federo',serif;letter-spacing:.2em;font-size:13px;
+.guide .corner{width:54px;height:54px}
+.guide .corner.tl{top:-10px;left:-10px}
+.guide .corner.tr{top:-10px;right:-10px}
+.guide .corner.bl{bottom:-10px;left:-10px}
+.guide .corner.br{bottom:-10px;right:-10px}
+.guide::before{content:"TONE GUIDE";position:absolute;top:-17px;left:64px;z-index:3;font-family:'Federo',serif;letter-spacing:.2em;font-size:13px;
   background:linear-gradient(180deg,var(--brass-hi),var(--brass));color:#2a1708;padding:5px 14px;border-radius:4px;box-shadow:0 3px 6px rgba(0,0,0,.5)}
 .guide h2{font-family:'Federo',serif;font-weight:400;font-size:34px;margin:0;color:#5a1f08;letter-spacing:.02em}
 .guide .tag{font-style:italic;color:var(--ink-soft);font-size:18px;margin:2px 0 14px}
@@ -354,7 +364,9 @@ button{font-family:inherit}
   .readout input{font-size:40px}
   .bbtn{min-width:44px;height:32px;font-size:14px}
   .fine{gap:5px}
-  .guide{padding:24px 18px 20px}
+  .guide{padding:28px 20px 22px}
+  .guide .corner{width:40px;height:40px}
+  .guide::before{left:48px}
   .guide h2{font-size:28px}
   .dialWin{height:130px}
   .dialFrame{border-width:22px;border-image-width:22px}
@@ -479,7 +491,10 @@ button{font-family:inherit}
     </div>
   </div>
 
-  <div class="guide" id="guide" aria-live="polite"></div>
+  <div class="guide">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div id="guide" aria-live="polite"></div>
+  </div>
 
   <div class="foot">
     For relaxation and meditation only &mdash; not medical advice: <a id="noticeLink">Read the full notice</a>
