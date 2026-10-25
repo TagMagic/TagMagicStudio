@@ -80,7 +80,13 @@ button{font-family:inherit}
   background:linear-gradient(#1c0b03,#0b0401);border-radius:0 0 10px 10px;z-index:-1;
 }
 .header{display:flex;align-items:center;justify-content:center;gap:14px;margin:-6px 0 6px;position:relative}
-.header .wiz{width:118px;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+.header .wiz{width:118px;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));animation:wizFloat 4.2s ease-in-out infinite}
+.splashCard img.w{animation:wizFloat 4.2s ease-in-out infinite}
+@keyframes wizFloat{
+  0%,100%{transform:translateY(0) rotate(-1.5deg);filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+  50%{transform:translateY(-10px) rotate(1.5deg);filter:drop-shadow(0 16px 14px rgba(0,0,0,.4))}
+}
+@media (prefers-reduced-motion:reduce){.header .wiz,.splashCard img.w{animation:none}}
 .header .logo{width:min(470px,62vw);height:auto;filter:drop-shadow(0 5px 8px rgba(0,0,0,.6))}
 
 /* ---------- Dial window ---------- */
