@@ -215,6 +215,9 @@ button{font-family:inherit}
 .vsl .ticks span{position:absolute;left:0;transform:translateY(-50%);font-family:'Federo',serif;font-size:11px;color:var(--cream-lo);width:28px;text-align:right}
 .vsl .ticks span::after{content:"";position:absolute;right:-8px;top:50%;width:5px;height:1px;background:var(--brass)}
 .vsl.dim{opacity:.45;filter:grayscale(.4)}
+.discWrap{width:100%;margin-top:6px}
+.hsl.disc .ticks span{font-size:13px;letter-spacing:.06em;cursor:pointer}
+.hsl.disc .ticks span.on{color:var(--amber);text-shadow:0 0 6px rgba(255,170,40,.8)}
 .val small{display:block;font-size:13px;color:var(--cream-lo);text-shadow:none;text-align:center}
 .hsl:focus-visible,.vsl:focus-visible{outline:2px solid var(--amber);outline-offset:4px;border-radius:8px}
 
@@ -407,6 +410,18 @@ button{font-family:inherit}
           </div>
           <div class="sub">SLIDE TO TUNE &nbsp;·&nbsp; USE THE BUTTONS FOR FINE STEPS</div>
         </div>
+        <div class="knobWrap discWrap">
+          <div class="lbl">Tone Color</div>
+          <div class="hsl disc" id="sWave" tabindex="0" role="slider" aria-label="Tone color">
+            <div class="track"></div><div class="fill"></div><div class="ticks"></div><div class="handle"></div>
+          </div>
+        </div>
+        <div class="knobWrap discWrap">
+          <div class="lbl">Timer (minutes)</div>
+          <div class="hsl disc" id="sTime" tabindex="0" role="slider" aria-label="Timer in minutes">
+            <div class="track"></div><div class="fill"></div><div class="ticks"></div><div class="handle"></div>
+          </div>
+        </div>
       </div>
 
       <!-- right: controls -->
@@ -441,14 +456,6 @@ button{font-family:inherit}
           <div class="lbl">Beat</div><div class="val" id="vBeat">10.0 Hz · Alpha</div>
         </div>
 
-        <div class="knobWrap">
-          <div class="chickWrap" id="selWave"></div>
-          <div class="lbl" style="margin-top:-6px">Tone Color</div>
-        </div>
-        <div class="knobWrap">
-          <div class="chickWrap" id="selTime"></div>
-          <div class="lbl" style="margin-top:-6px">Timer (min)</div>
-        </div>
         <div class="span2 knobWrap">
           <div class="timeWin" id="timeLeft">--:--</div>
           <div class="sub">TIME LEFT</div>
@@ -763,30 +770,22 @@ function setBeat(b, fromPreset){
 }
 slider(sBeat, false, p=>{ const b=BMIN*Math.pow(BMAX/BMIN,p); setBeat(b<10 ? Math.round(b*10)/10 : Math.round(b*2)/2); }, (s,fine)=> setBeat(st.beat + s*(fine?0.1:0.5)), (s,fine)=> setBeat(st.beat + s*(fine?0.1:0.5)));
 
-/* chicken-head selectors */
-function chicken(host, labels, angles, onChange){
-  host.innerHTML = '<div class="chick" tabindex="0" role="slider"><svg viewBox="0 0 64 64">'+
-    '<defs><radialGradient id="cg'+host.id+'" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#a0552a"/><stop offset=".5" stop-color="#3b1a0b"/><stop offset="1" stop-color="#170803"/></radialGradient>'+
-    '<linearGradient id="br'+host.id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dd93"/><stop offset=".5" stop-color="#c9a24a"/><stop offset="1" stop-color="#6e5018"/></linearGradient></defs>'+
-    '<circle cx="32" cy="32" r="30" fill="url(#br'+host.id+')"/><circle cx="32" cy="32" r="26" fill="#1a0a03"/>'+
-    '<g class="ptr"><path d="M32 -6 C38 -6 41 20 44 30 C46 40 42 50 32 50 C22 50 18 40 20 30 C23 20 26 -6 32 -6 Z" fill="url(#cg'+host.id+')" stroke="#0a0401" stroke-width="1"/>'+
-    '<line x1="32" y1="-2" x2="32" y2="18" stroke="#efe2bf" stroke-width="2.5" stroke-linecap="round"/>'+
-    '<ellipse cx="28" cy="20" rx="3" ry="9" fill="rgba(255,235,200,.25)"/></g></svg></div>';
-  const ch = host.querySelector(".chick"), ptr = host.querySelector(".ptr");
-  const opts = labels.map((l,i)=>{
-    const o=document.createElement("span"); o.className="opt"; o.textContent=l;
-    const a=(angles[i]-90)*Math.PI/180, r=55;
-    o.style.left=(75+Math.cos(a)*r)+"px"; o.style.top=(58+Math.sin(a)*r)+"px";
-    o.addEventListener("click", ()=> set(i)); host.appendChild(o); return o;
-  });
-  let idx=0, acc=0;
-  function set(i, quiet){ idx=clamp(i,0,labels.length-1); ptr.style.transform="rotate("+angles[idx]+"deg)";
-    opts.forEach((o,j)=>o.classList.toggle("on",j===idx)); ch.setAttribute("aria-valuetext",labels[idx]); if(!quiet) onChange(idx); }
-  drag(ch, d=>{ acc+=d; if(Math.abs(acc)>28){ set(idx+Math.sign(acc)); acc=0; } }, ()=> set((idx+1)%labels.length), s=> set(idx+s), s=> set(idx+s));
+/* stepped sliders */
+function stepped(el, labels, onChange){
+  const n=labels.length, tk=el.querySelector(".ticks");
+  const spans = labels.map((l,i)=>{ const sp=document.createElement("span"); sp.textContent=l; sp.style.left=(i/(n-1)*100)+"%"; tk.appendChild(sp); return sp; });
+  let idx=-1;
+  function set(i, quiet){
+    i=clamp(Math.round(i),0,n-1); if(i===idx && !quiet) return; idx=i;
+    placeH(el, idx/(n-1)); spans.forEach((sp,j)=>sp.classList.toggle("on",j===idx));
+    el.setAttribute("aria-valuetext",labels[idx]);
+    if(!quiet) onChange(idx);
+  }
+  slider(el, true, p=> set(p*(n-1)), s=> set(idx+s), s=> set(idx+s));
   return set;
 }
-const setWaveSel = chicken($("#selWave"), WAVES.map(w=>w.n), [-60,-20,20,60], i=>{ st.wave=i; applyWave(oscL); applyWave(oscR); });
-const setTimeSel = chicken($("#selTime"), TIMES.map(t=>t?String(t):"OFF"), TIMES.map((_,i)=>-126+i*36), i=>{
+const setWaveSel = stepped($("#sWave"), WAVES.map(w=>w.n.charAt(0)+w.n.slice(1).toLowerCase()), i=>{ st.wave=i; applyWave(oscL); applyWave(oscR); });
+const setTimeSel = stepped($("#sTime"), TIMES.map(t=>t?String(t):"Off"), i=>{
   st.timer=TIMES[i]; st.endAt = (st.playing && st.timer) ? performance.now()+st.timer*60000 : 0; renderTime(); });
 
 /* toggles */
