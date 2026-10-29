@@ -292,6 +292,9 @@ table.cal td.day:hover,table.cal td.day:focus{outline:2px solid var(--wine);outl
 .pdfwiz{width:90px}
 
 .promo{text-align:center;font-size:13px;color:var(--ink2);margin-top:10px;letter-spacing:.3px}
+.promo a{color:var(--wine);text-decoration:underline}
+footer .legal{margin-top:6px;font-size:14px}
+footer .linkbtn{font-size:14px}
 
 /* ---------- Trial bar & purchase window ---------- */
 .trialbar{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 18px;font-size:17px;color:var(--muted)}
@@ -356,7 +359,6 @@ table.cal td.day:hover,table.cal td.day:focus{outline:2px solid var(--wine);outl
     <button class="tab" data-tab="couple" role="tab">Relationship Report</button>
     <button class="tab" data-tab="single" role="tab">Love Match Report</button>
   </nav>
-  <div class="trialbar no-print" id="trialbar"></div>
 
   <!-- YEARLY -->
   <section class="panel" id="panel-yearly">
@@ -436,33 +438,6 @@ table.cal td.day:hover,table.cal td.day:focus{outline:2px solid var(--wine);outl
     <article class="report" id="report"></article>
   </div>
 
-  <!-- Purchase / license window -->
-  <div class="modal-bg no-print" id="buyModal" role="dialog" aria-modal="true" aria-labelledby="buyTitle">
-    <div class="modal">
-      <button class="close" data-close aria-label="Close">&times;</button>
-      <img class="mwiz" id="mwiz" alt="">
-      <h2 id="buyTitle">Unlock NumerologistMagic</h2>
-      <p class="status" id="buyStatus"></p>
-      <div class="price">$15.99<small>one-time purchase &middot; no subscription</small></div>
-      <ul>
-        <li>Unlimited Yearly, Relationship and Love Match reports</li>
-        <li>Your own name or business name on every report</li>
-        <li>Print any report or save it as a PDF</li>
-      </ul>
-      <div class="resale"><b>FULL RESALE RIGHTS INCLUDED:</b> sell the reports you create, at any price you choose, under your own numerology or matchmaking business.</div>
-      <a class="btn primary buy" id="buyBtn" href="#" target="_blank" rel="noopener">Buy Now &mdash; $15.99</a>
-      <p class="fine">Secure checkout by Stripe. Your license key appears on screen right after payment.</p>
-      <hr>
-      <h3>Already purchased? Enter your license key</h3>
-      <div class="keyrow">
-        <input id="keyInput" placeholder="NMAG-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
-        <button class="btn primary small" id="keyBtn">Activate</button>
-      </div>
-      <div class="keymsg" id="keyMsg"></div>
-      <p style="text-align:center;margin:12px 0 0"><button class="linkbtn" data-terms>License terms</button></p>
-    </div>
-  </div>
-
   <div class="modal-bg no-print" id="dayModal" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
     <div class="modal daymodal">
       <button class="close" data-close aria-label="Close">&times;</button>
@@ -484,16 +459,19 @@ table.cal td.day:hover,table.cal td.day:focus{outline:2px solid var(--wine);outl
       <button class="close" data-close aria-label="Close">&times;</button>
       <h2 id="termsTitle">License Terms</h2>
       <div class="terms">
-        <p>Your NumerologistMagic license lets you create unlimited reports.</p>
-        <p><b>Resale rights:</b> the reports you create are yours to use however you like. You may print, email and share them, and sell them to your own clients at any price, under your own name or business name, including as part of a numerology or matchmaking business.</p>
-        <p><b>What isn't included:</b> you may not resell, copy, share or give away the NumerologistMagic app itself or your license key.</p>
+        <p>NumerologistMagic is free to use, with unlimited reports.</p>
+        <p><b>Your reports:</b> the reports you create are yours to use however you like. You may print, email and share them, and sell them to your own clients at any price, under your own name or business name, including as part of a numerology or matchmaking business.</p>
+        <p><b>The app:</b> NumerologistMagic&trade;, its name, logo and wizard artwork, and the app itself are &copy; 2026 TagMagic Studio. You may not copy, resell, redistribute or rebrand the NumerologistMagic app.</p>
         <p>Numerology reports are offered for personal insight and entertainment.</p>
       </div>
       <p style="text-align:center;margin-top:14px"><button class="btn ghost" data-close>Close</button></p>
     </div>
   </div>
 
-  <footer class="no-print">Try It Free! A Numerology Report Generator From: <a href="https://tagmagicstudio.com" target="_blank" rel="noopener">TagMagic Studio</a></footer>
+  <footer class="no-print">
+    <div>A Free Numerology Report Generator From: <a href="https://tagmagicstudio.com" target="_blank" rel="noopener">TagMagic Studio</a></div>
+    <div class="legal">&copy; 2026 TagMagic Studio. All rights reserved. &middot; NumerologistMagic&trade; &middot; <button class="linkbtn" data-terms>License Terms</button></div>
+  </footer>
 </div>
 
 <script>
@@ -803,7 +781,7 @@ function monthTable(py, Y, showTags){
   return `<table class="months"><thead><tr><th>Month</th><th style="text-align:center">No.</th><th>Guidance for ${Y}</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function closing(){ return `<div class="closing">Numbers describe tendencies and timing, not fate. Use this reading as a guide, and let your own heart and good sense make the final call.</div>`
-  + (isLicensed() ? "" : `<div class="promo">Created with NumerologistMagic &middot; tagmagicstudio.com/numerologistmagic</div>`); }
+  + `<div class="promo">Created Using NumerologistMagic by <a href="https://tagmagicstudio.com" target="_blank" rel="noopener">TagMagic Studio</a></div>`; }
 
 /* ---------- In-depth interpretation content ---------- */
 const DEEP = {
@@ -1337,69 +1315,12 @@ function singleReport(p, Y){
   + closing();
 }
 
-/* ---------- Free trial & license ---------- */
-const PAYMENT_LINK   = "https://buy.stripe.com/fZu28qast1I19Zeb4Z9ws05";
-const LICENSE_SERVER = "https://numerologistmagic-license.tagmagicstudio.workers.dev";
-const FREE_REPORTS   = 10;
-
+/* ---------- Saved settings on this computer ---------- */
 const store = {
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
   set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
   del(k){ try{ localStorage.removeItem(k); }catch(e){} }
 };
-const trialUsed  = () => Math.max(0, parseInt(store.get("nm_used")||"0",10) || 0);
-const trialLeft  = () => Math.max(0, FREE_REPORTS - trialUsed());
-const isLicensed = () => !!store.get("nm_license");
-
-function renderTrial(){
-  const bar=document.getElementById("trialbar");
-  if(isLicensed()){
-    bar.innerHTML=`<span class="lic">&#10004; Licensed</span><span class="lic">&mdash;</span><button class="linkbtn" data-terms>License Terms</button>`;
-  } else {
-    const left=trialLeft();
-    bar.innerHTML = (left>0
-      ? `<span>Free trial: <b>${left}</b> of ${FREE_REPORTS} free reports left</span>`
-      : `<span>Your <b>${FREE_REPORTS}</b> free reports have been used</span>`)
-      + `<button class="btn primary small" data-buy>Unlock Full Version &mdash; $15.99</button>`;
-  }
-}
-function openModal(id){ document.getElementById(id).classList.add("open"); }
-function closeModals(){ document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open")); }
-function openBuy(){
-  const left=trialLeft();
-  document.getElementById("buyStatus").textContent = left>0
-    ? `You have ${left} free report${left===1?"":"s"} left in your trial.`
-    : `You've used all ${FREE_REPORTS} free reports. Unlock the full version to keep going.`;
-  document.getElementById("keyMsg").textContent=""; document.getElementById("keyMsg").className="keymsg";
-  openModal("buyModal");
-}
-function normKey(k){ return String(k||"").toUpperCase().replace(/\s+/g,""); }
-async function activateKey(raw){
-  const key=normKey(raw);
-  if(!/^NMAG(-[A-Z0-9]{4}){3}$/.test(key)) return {ok:false,msg:"That doesn't look like a NumerologistMagic key. It should look like NMAG-XXXX-XXXX-XXXX."};
-  if(!LICENSE_SERVER) return {ok:false,msg:"License activation isn't switched on yet. Please try again soon."};
-  try{
-    const r=await fetch(LICENSE_SERVER.replace(/\/+$/,"")+"/verify?key="+encodeURIComponent(key),{cache:"no-store"});
-    const j=await r.json();
-    if(j.valid){ store.set("nm_license",key); renderTrial(); return {ok:true,msg:"Thank you! NumerologistMagic is now unlocked with unlimited reports."}; }
-    return {ok:false,msg:"That license key wasn't found. Please check it and try again."};
-  }catch(e){ return {ok:false,msg:"Couldn't reach the license server. Please check your internet connection and try again."}; }
-}
-async function onActivate(){
-  const btn=document.getElementById("keyBtn"), msg=document.getElementById("keyMsg");
-  btn.disabled=true; msg.className="keymsg"; msg.textContent="Checking your key...";
-  const res=await activateKey(document.getElementById("keyInput").value);
-  btn.disabled=false; msg.className="keymsg "+(res.ok?"ok":"bad"); msg.textContent=res.msg;
-  if(res.ok) setTimeout(closeModals,2200);
-}
-/* Re-check a saved key now and then; turns it off only if the server says it is no longer valid */
-async function recheckLicense(){
-  const key=store.get("nm_license"); if(!key||!LICENSE_SERVER) return;
-  try{
-    const r=await fetch(LICENSE_SERVER.replace(/\/+$/,"")+"/verify?key="+encodeURIComponent(key),{cache:"no-store"});
-    const j=await r.json(); if(j && j.valid===false){ store.del("nm_license"); renderTrial(); }
-  }catch(e){ /* offline: keep working */ }
-}
 
 /* ---------- UI ---------- */
 function buildDate(containerId, prefix){
@@ -1436,12 +1357,10 @@ function readYear(id){ const v=+document.getElementById(id).value; return (v>=19
 function show(html){
   document.getElementById("report").innerHTML=html;
   const w=document.getElementById("reportWrap"); w.style.display="block";
-  if(!isLicensed()){ store.set("nm_used", String(trialUsed()+1)); renderTrial(); }
   w.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function generate(kind){
   const err=document.getElementById("err-"+kind); err.textContent="";
-  if(!isLicensed() && trialLeft()<=0){ openBuy(); return; }
   try{
     if(kind==="yearly"){
       const p=readPerson("y","y-name"); if(p.err) return err.textContent=p.err;
@@ -1498,6 +1417,8 @@ async function savePdf(){
     const top0=stage.getBoundingClientRect().top;
     const rel=el=>{ const r=el.getBoundingClientRect(); return [r.top-top0, r.bottom-top0]; };
     const total=Math.ceil(stage.scrollHeight);
+    const left0=stage.getBoundingClientRect().left;
+    const links=[...stage.querySelectorAll("a[href]")].map(el=>{ const r=el.getBoundingClientRect(); return {url:el.href, x:r.left-left0, y:r.top-top0, w:r.width, h:r.height}; });
     // parts of the report that must never be cut in half
     const U=".rpt-head,h2,h3,p,li,tr,.numcard,.box,.lines > div,.mh,.mt,.overall,.match,.calmonth,.closing,table.chart,.chip,.calc,.focus,.dial";
     const ivs=[...stage.querySelectorAll(U)].map(el=>{ let [a,b]=rel(el); if(/^H[23]$/.test(el.tagName)||el.classList.contains("mh")||el.classList.contains("mt")) b+=60; return [a,b]; });
@@ -1529,6 +1450,7 @@ async function savePdf(){
         ctx.drawImage(canvas,0,(a-c.a)*SCALE,W*SCALE,h*SCALE,0,0,W*SCALE,h*SCALE);
         if(i>0) pdf.addPage();
         pdf.addImage(pc.toDataURL("image/jpeg",0.9),"JPEG",0.5,0.5,7.5,h/96);
+        links.filter(L=>L.y>=a && L.y+L.h<=b).forEach(L=>pdf.link(0.5+L.x/96, 0.5+(L.y-a)/96, L.w/96, L.h/96, {url:L.url}));
         pdf.setFontSize(8); pdf.setTextColor(140,120,100);
         pdf.text(`Page ${i+1} of ${pages.length}`,4.25,10.75,{align:"center"});
         done++;
@@ -1558,27 +1480,14 @@ const prep=document.getElementById("prepBy");
 prep.value=store.get("nm_prepBy")||"";
 prep.addEventListener("input",()=>store.set("nm_prepBy",prep.value));
 
-/* Trial bar, purchase window and license key */
-document.getElementById("buyBtn").href=PAYMENT_LINK;
-document.getElementById("mwiz").src=document.querySelector(".hero .wiz").src;
+/* Pop-up windows */
+function openModal(id){ document.getElementById(id).classList.add("open"); }
+function closeModals(){ document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open")); }
 document.addEventListener("click",e=>{
-  if(e.target.closest("[data-buy]")) openBuy();
   if(e.target.closest("[data-terms]")){ closeModals(); openModal("termsModal"); }
   if(e.target.closest("[data-close]") || e.target.classList.contains("modal-bg")) closeModals();
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModals(); });
-document.getElementById("keyBtn").addEventListener("click",onActivate);
-document.getElementById("keyInput").addEventListener("keydown",e=>{ if(e.key==="Enter") onActivate(); });
-renderTrial();
-recheckLicense();
-
-/* Arriving from the purchase page with ?key=... unlocks automatically */
-(async()=>{
-  const k=new URLSearchParams(location.search).get("key");
-  if(!k) return;
-  try{ history.replaceState(null,"",location.pathname); }catch(e){}
-  openBuy(); document.getElementById("keyInput").value=normKey(k); onActivate();
-})();
 
 /* Click a calendar day for its full reading */
 function openDay(td){
