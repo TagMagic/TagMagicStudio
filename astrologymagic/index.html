@@ -167,6 +167,14 @@ h3.sec::before,h3.sec::after{content:'\2726';color:var(--gold);margin:0 10px;fon
 .bbar em{font-style:normal;text-align:right;color:var(--gold2)}
 footer{text-align:center;margin-top:24px;font-family:'Josefin Sans',sans-serif;color:var(--muted);font-size:.9rem}
 footer a{color:var(--gold2);text-decoration:none;font-weight:700;letter-spacing:1px}
+.legal{margin-top:10px;font-size:.82rem}
+.linkBtn{background:none;border:0;padding:0;font:inherit;color:var(--gold2);cursor:pointer;font-weight:700}
+.linkBtn:hover{text-decoration:underline}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(5,7,24,.78);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal[hidden]{display:none}
+.modalBox{position:relative;max-width:620px;max-height:85vh;overflow:auto;background:linear-gradient(170deg,#1b2560,#0d1238);border:2px solid var(--gold);border-radius:16px;padding:24px 26px}
+.modalBox p{margin:.3em 0 .9em}
+.modalX{position:absolute;top:10px;right:12px;background:none;border:0;color:var(--gold2);font-size:1.3rem;cursor:pointer}
 @media (max-width:760px){
   html{font-size:17px}
   .chartWrap,.bal,.matchTop{grid-template-columns:1fr}
@@ -182,7 +190,7 @@ footer a{color:var(--gold2);text-decoration:none;font-weight:700;letter-spacing:
 }
 @media print{
   body{background:#fff;color:#222}
-  #bg,#stars,header,.deco,.tabs,.person,.panelIntro,.go,.prep,.actions,footer,.fc,.filter{display:none!important}
+  #bg,#stars,header,.deco,.tabs,.person,.panelIntro,.go,.prep,.actions,footer,.modal,.fc,.filter{display:none!important}
   .panel[hidden]{display:none!important}
   .report{border:2px solid #b48a2c;background:#fff;box-shadow:none;color:#222}
   .repName{color:#222} .repMeta,.muted,.legend{color:#555}
@@ -255,7 +263,27 @@ footer a{color:var(--gold2);text-decoration:none;font-weight:700;letter-spacing:
   <footer>
     <p>For entertainment and self-reflection</p>
     <a href="https://tagmagicstudio.com" target="_blank" rel="noopener">TagMagic Studio</a>
+    <p class="legal">© 2026 TagMagic Studio. All rights reserved. · AstrologyMagic™ · <button type="button" class="linkBtn" id="openTerms">License Terms</button></p>
   </footer>
+  <div class="modal" id="terms" hidden role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+    <div class="modalBox">
+      <button type="button" class="modalX" id="closeTerms" aria-label="Close">✕</button>
+      <h2 id="termsTitle">License Terms</h2>
+      <p>AstrologyMagic is free to use, with unlimited reports.</p>
+      <h4>Your Reports</h4>
+      <p>The reports you create are yours to use however you like. You may print, email and share them, and sell them to your own clients at any price, under your own name or business name, including as part of an astrology business.</p>
+      <h4>The App</h4>
+      <p>AstrologyMagic™, its name, logo and wizard artwork, and the app itself are © 2026 TagMagic Studio. You may not copy, resell, redistribute or rebrand the AstrologyMagic app.</p>
+      <p class="muted">Astrology reports are offered for personal insight and entertainment.</p>
+    </div>
+  </div>
+  <script>
+  (function(){var m=document.getElementById('terms');
+    document.getElementById('openTerms').onclick=function(){m.hidden=false;document.getElementById('closeTerms').focus();};
+    document.getElementById('closeTerms').onclick=function(){m.hidden=true;};
+    m.addEventListener('click',function(e){if(e.target===m)m.hidden=true;});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')m.hidden=true;});})();
+  </script>
 </div>
 <script>
 /* Astronomy Engine v2.1.19 by Don Cross, MIT License, https://github.com/cosinekitty/astronomy */
