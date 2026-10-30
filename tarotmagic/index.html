@@ -1015,7 +1015,7 @@ function updateToggles(){
   $("soundBtn").textContent=soundOn?"♪ Sounds: On":"♪ Sounds: Off"; $("soundBtn").classList.toggle("on",soundOn);
   try{ localStorage.setItem("tm_voice",voiceOn?"1":"0"); localStorage.setItem("tm_sound",soundOn?"1":"0"); }catch(e){}
 }
-$("voiceBtn").onclick=()=>{ voiceOn=!voiceOn; updateToggles(); if(voiceOn) speak(lastSaid.html||$("speech").innerHTML,lastSaid.keys); else stopVoice(); };
+$("voiceBtn").onclick=()=>{ if(!MV){ say("Madame’s voice file (voice.js) did not load. Put voice.js in the same folder as this page.",false); return; } voiceOn=!voiceOn; updateToggles(); if(voiceOn) speak(lastSaid.html||$("speech").innerHTML,lastSaid.keys); else stopVoice(); };
 $("soundBtn").onclick=()=>{ soundOn=!soundOn; updateToggles(); };
 $("dealBtn").onclick=deal;
 $("turnAllBtn").onclick=turnAll;
@@ -1027,7 +1027,6 @@ window.addEventListener("resize",layoutTable);
   const useSvg=()=>{ im.remove(); $("portrait").insertAdjacentHTML("beforeend",READER_SVG); };
   if(im.complete && !im.naturalWidth) useSvg(); else im.onerror=useSvg;
 })();
-if(!MV) $("voiceBtn").classList.add("hidden");   // no voice.js = no voice button
 renderSpreadButtons(); updateToggles(); checkImages();
 {const k=pickI(GREET); say(GREET[k],false); lastSaid={html:GREET[k],keys:["greet:"+k]};}
 </script>
