@@ -567,7 +567,7 @@ function cardBackSVG(){
   ${corner(11,11,1)}${corner(109,11,1).replace('scale(1)','scale(-1 1)')}${corner(11,195,1).replace('scale(1)','scale(1 -1)')}${corner(109,195,1).replace('scale(1)','scale(-1 -1)')}
   </svg>`;
 }
-const BACK_URL="url(\"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(cardBackSVG())+"\")";
+const BACK_URL="url('data:image/svg+xml;charset=utf-8,"+encodeURIComponent(cardBackSVG()).replace(/'/g,"%27")+"')";
 
 const SUIT_ICON={
   wands:`<svg viewBox="0 0 100 100"><path d="M30 90 L70 12" stroke="#6b3a14" stroke-width="7" stroke-linecap="round"/><path d="M62 30 q12 -6 14 4 q-10 4 -14 -4Z M48 52 q-12 -4 -14 6 q10 4 14 -6Z M57 40 q12 2 10 12 q-10 -2 -10 -12Z" fill="#4f7a2a"/></svg>`,
