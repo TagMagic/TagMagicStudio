@@ -39,7 +39,7 @@ button{font-family:"Cinzel",Georgia,serif; cursor:pointer}
 header{text-align:center; padding:18px 0 4px}
 header img.logo{width:min(560px,92%); height:auto; filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))}
 header .logoText{display:none; font-family:"Cinzel Decorative",serif; font-size:56px; color:var(--gold2); text-shadow:0 3px 0 #5a2a00, 0 0 24px rgba(var(--candle),.4)}
-.tagline{font-style:italic; color:var(--parch2); margin:2px 0 12px; letter-spacing:.5px}
+.tagline{font-style:italic; color:var(--parch2); margin:2px 0 12px; letter-spacing:.5px; text-shadow:0 0 3px #000, 0 2px 8px rgba(0,0,0,.95), 0 0 18px rgba(0,0,0,.8)}
 nav.tabs{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:18px}
 nav.tabs button{
   background:linear-gradient(#3a0d2a,#24081a); color:var(--gold2); border:1px solid var(--goldDim);
@@ -78,6 +78,7 @@ h2,h3{font-family:"Cinzel",serif; color:var(--gold2); letter-spacing:1px; font-w
 @keyframes fadeIn{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
 .toggles{display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap}
 .toggle{background:#2a0a1e; border:1px solid var(--goldDim); color:var(--parch2); border-radius:20px; padding:6px 12px; font-size:13px}
+.voiceSel{display:block; width:100%; margin-top:8px; background:#2a0a1e; color:var(--parch2); border:1px solid var(--goldDim); border-radius:20px; padding:6px 10px; font-family:"IM Fell English",serif; font-size:14px}
 .toggle.on{background:#5a3a10; color:var(--gold2); border-color:var(--gold)}
 
 .controls{padding:16px 18px; margin-bottom:16px}
@@ -246,6 +247,7 @@ footer .fine{font-size:13px; opacity:.75; margin-top:8px; font-style:italic}
         <button class="toggle" id="voiceBtn" title="Madame reads aloud">🔇 Her Voice: Off</button>
         <button class="toggle on" id="soundBtn" title="Shuffle and card sounds">♪ Sounds: On</button>
       </div>
+      <select id="voiceSel" class="voiceSel hidden" title="Choose Madame Esmeralda's voice"></select>
     </aside>
 
     <div>
@@ -312,6 +314,7 @@ footer .fine{font-size:13px; opacity:.75; margin-top:8px; font-style:italic}
   <div class="fine">Card art by Pamela Colman Smith, published 1909 (public domain). Readings are for reflection and entertainment.</div>
 </footer>
 
+<script src="voice.js"></script>
 <script>
 /* =====================================================================
    THE DECK — all 78 cards with traditional meanings
@@ -653,13 +656,17 @@ const BLESS=[
   "The candle burns low, but your light burns on. Come back whenever the cards call you."
 ];
 
-function cardLine(pos,c,rev,spreadKey){
+// Returns the words (html) plus the list of Madame's recorded clips that speak them
+function cardLine(pos,posIndex,c,rev,spreadKey){
+  const r=rev?"r":"u";
   let t=`${pos.intro} <b>${c.name}${rev?", reversed":""}</b>. `;
+  const keys=[`intro:${spreadKey}:${posIndex}`,`name:${c.id}:${r}`,`mean:${c.id}:${r}`];
   t+=rev?c.rev:c.up;
-  if(spreadKey==="love") t+=` <i>In matters of love: ${rev?"its gifts are blocked or delayed for now — "+lowerFirst(c.love):c.love}</i>`;
-  if(c.arcana==="major" && !rev && Math.random()<.5) t+=" This is a card of the Major Arcana — a great force of destiny is at work here.";
-  return t;
+  if(spreadKey==="love"){ t+=` <i>In matters of love: ${rev?"its gifts are blocked or delayed for now — "+lowerFirst(c.love):c.love}</i>`; keys.push(`lovehdr:${r}`,`love:${c.id}`); }
+  if(c.arcana==="major" && !rev && Math.random()<.5){ t+=" This is a card of the Major Arcana — a great force of destiny is at work here."; keys.push("major"); }
+  return {html:t, keys};
 }
+const pickI=a=>Math.floor(Math.random()*a.length);
 function lowerFirst(s){return s.charAt(0).toLowerCase()+s.slice(1)}
 
 const BRIGHT=new Set(["m19","m17","m21","m10","m06","cups10","cups09","cups01","cups02","cups03","wands06","wands04","pents10","pents09","pents01","m03"]);
@@ -709,23 +716,73 @@ function escapeHTML(s){return s.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;","
 /* =====================================================================
    VOICE & SOUND
    ===================================================================== */
-let voiceOn=false, soundOn=true, chosenVoice=null;
-try{ voiceOn=localStorage.getItem("tm_voice")==="1"; soundOn=localStorage.getItem("tm_sound")!=="0"; }catch(e){}
-function pickVoice(){
-  if(!("speechSynthesis" in window)) return;
-  const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
-  const pref=["Aria","Jenny","Sonia","Libby","Hazel","Zira","Susan","Samantha","Victoria","Karen","Moira","Tessa","Serena","Female","Google UK English Female"];
-  for(const p of pref){const v=vs.find(v=>v.name.includes(p)); if(v){chosenVoice=v; return;}}
-  chosenVoice=vs[0]||null;
+let voiceOn=false, soundOn=true, chosenVoice=null, savedVoiceName="";
+try{ const sv=localStorage.getItem("tm_voice"); voiceOn=sv===null?!!window.MADAME_VOICE:sv==="1"; soundOn=localStorage.getItem("tm_sound")!=="0"; savedVoiceName=localStorage.getItem("tm_voiceName")||""; }catch(e){}
+
+// Best-sounding voices first: Edge "Natural" voices, then other online voices, then women's voices
+const FEMALE=["Sonia","Libby","Maisie","Hollie","Ava","Emma","Jenny","Aria","Michelle","Natasha","Clara","Molly","Hazel","Susan","Zira","Samantha","Victoria","Karen","Moira","Tessa","Serena","Female"];
+function voiceScore(v){
+  let s=0;
+  if(/natural/i.test(v.name)) s+=100;
+  if(/online/i.test(v.name)) s+=40;
+  if(/google/i.test(v.name)) s+=20;
+  const i=FEMALE.findIndex(n=>v.name.includes(n)); if(i>=0) s+=30-i;
+  if(/en-GB/i.test(v.lang)) s+=5;
+  return s;
 }
-if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
-function speak(html){
-  if(!voiceOn || !("speechSynthesis" in window)) return;
+function voiceLabel(v){
+  return (/natural/i.test(v.name)?"\u2605 ":"")+v.name.replace(/^Microsoft\s+/,"").replace(/\s+Online/,"").replace(/\s+-\s+/," \u00b7 ");
+}
+function setupVoices(){
+  const sel=$("voiceSel");
+  if(MV || !("speechSynthesis" in window)){ sel.classList.add("hidden"); return; }
+  const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)).sort((x,y)=>voiceScore(y)-voiceScore(x));
+  if(!vs.length){ sel.classList.add("hidden"); return; }
+  sel.classList.remove("hidden");
+  chosenVoice=vs.find(v=>v.name===savedVoiceName)||vs[0];
+  sel.innerHTML=vs.map(v=>`<option value="${escapeHTML(v.name)}"${v===chosenVoice?" selected":""}>${escapeHTML(voiceLabel(v))}</option>`).join("");
+  sel.onchange=()=>{
+    chosenVoice=vs.find(v=>v.name===sel.value)||chosenVoice;
+    try{ localStorage.setItem("tm_voiceName",chosenVoice.name); }catch(e){}
+    speak("Ah… so this is how I shall speak to you, my dear. Let us see what the cards reveal.",null,true);
+  };
+}
+// Madame's recorded voice (voice.js). Plays her clips one after another with natural pauses.
+const MV=window.MADAME_VOICE||null;
+const voicePlayer=new Audio(); let voiceToken=0, lastSaid={html:"",keys:null};
+function stopVoice(){ voiceToken++; voicePlayer.pause(); if("speechSynthesis" in window) speechSynthesis.cancel(); }
+async function playClips(keys){
+  const my=++voiceToken; voicePlayer.pause();
+  for(let n=0;n<keys.length;n++){
+    if(my!==voiceToken) return;
+    voicePlayer.src="data:audio/mpeg;base64,"+MV[keys[n]];
+    try{ await voicePlayer.play(); }catch(e){ return; }
+    await new Promise(res=>{ voicePlayer.onended=res; voicePlayer.onpause=res; });
+    if(my!==voiceToken) return;
+    await wait(keys[n].startsWith("intro:")?550:280);
+  }
+}
+function speak(html,keys,force){
+  lastSaid={html,keys};
+  if(!voiceOn && !force) return;
+  if(MV && keys && keys.every(k=>MV[k])){ if("speechSynthesis" in window) speechSynthesis.cancel(); playClips(keys); return; }
+  speakTTS(html);
+}
+// Backup: the browser's own voice, one sentence at a time
+function speakTTS(html){
+  if(!("speechSynthesis" in window)) return;
   const tmp=document.createElement("div"); tmp.innerHTML=html;
-  const u=new SpeechSynthesisUtterance(tmp.textContent.replace(/—/g,", "));
-  if(chosenVoice) u.voice=chosenVoice;
-  u.rate=.9; u.pitch=.95;
-  speechSynthesis.cancel(); speechSynthesis.speak(u);
+  const text=tmp.textContent.replace(/\s*\u2014\s*/g,", ").replace(/\u2026/g,"...");
+  const parts=text.match(/[^.!?]+[.!?]+["\u201d\u2019]*|[^.!?]+$/g)||[text];
+  const natural=chosenVoice && /natural|online/i.test(chosenVoice.name);
+  speechSynthesis.cancel();
+  parts.forEach(p=>{
+    p=p.trim(); if(!p) return;
+    const u=new SpeechSynthesisUtterance(p);
+    if(chosenVoice){ u.voice=chosenVoice; u.lang=chosenVoice.lang; }
+    u.rate=natural?.9:.88; u.pitch=natural?1:.95;
+    speechSynthesis.speak(u);
+  });
 }
 let actx=null;
 function audio(){ if(!actx){ try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){} } return actx; }
@@ -748,18 +805,19 @@ function dealSound(i){ if(!soundOn) return; const a=audio(); if(!a) return; nois
 /* =====================================================================
    READING TABLE
    ===================================================================== */
-let spreadKey="three", reading=null, busy=false;
+let spreadKey="celtic", reading=null, busy=false;
 const $=id=>document.getElementById(id);
 
-function say(html,{voice=true}={}){
+// keys = Madame's recorded clips for these words; false = show the words without speaking
+function say(html,keys=null){
   $("speech").innerHTML=`<p class="fade">${html}</p>`;
-  if(voice) speak(html);
+  if(keys!==false) speak(html,keys);
 }
 
 function renderSpreadButtons(){
   $("spreads").innerHTML=Object.entries(SPREADS).map(([k,s])=>`<button class="spreadBtn${k===spreadKey?" on":""}" data-k="${k}"><b>${s.title}</b><span>${s.sub}</span></button>`).join("");
   $("spreads").querySelectorAll("button").forEach(b=>b.onclick=()=>{
-    if(busy) return; spreadKey=b.dataset.k; renderSpreadButtons(); say(SPREAD_TALK[spreadKey]);
+    if(busy) return; spreadKey=b.dataset.k; renderSpreadButtons(); say(SPREAD_TALK[spreadKey],["spread:"+spreadKey]);
   });
 }
 
@@ -813,7 +871,7 @@ async function deal(){
   L.querySelectorAll(".tcard").forEach(el=>el.onclick=()=>onCardClick(+el.dataset.i));
 
   const deckEl=L.querySelector(".deck");
-  say(pick(SHUFFLE_TALK)); deckEl.classList.add("shuffling"); riffleSound();
+  {const k=pickI(SHUFFLE_TALK); say(SHUFFLE_TALK[k],["shuffle:"+k]);} deckEl.classList.add("shuffling"); riffleSound();
   await wait(2500);
   deckEl.classList.remove("shuffling");
   const cards=[...L.querySelectorAll(".tcard")];
@@ -823,7 +881,7 @@ async function deal(){
   await wait(cards.length*180+800);
   cards.forEach(el=>el.style.transitionDelay="0s");
   deckEl.style.opacity=0;
-  say(pick(DEALT_TALK));
+  {const k=pickI(DEALT_TALK); say(DEALT_TALK[k],["dealt:"+k]);}
   if(cards.length>1) $("turnAllBtn").classList.remove("hidden");
   saveToJournal(reading);
   busy=false; $("dealBtn").disabled=false;
@@ -843,8 +901,8 @@ function reveal(i,talk){
   reading.revealed.push(i);
   if(i===0) $("layout").classList.add("firstShown");
   const sp=SPREADS[reading.spread], p=sp.pos[i], dc=reading.cards[i], c=BY_ID[dc.id];
-  const line=cardLine(p,c,dc.rev,reading.spread);
-  if(talk) say(line);
+  const cl=cardLine(p,i,c,dc.rev,reading.spread), line=cl.html;
+  if(talk) say(line,cl.keys);
   addLogEntry(i,p,c,dc.rev,line);
   if(reading.revealed.length===sp.pos.length) finishReading(talk);
 }
@@ -870,7 +928,7 @@ function finishReading(talk){
   const P=summaryText(reading.spread,drawn,reading.question);
   $("summaryBox").innerHTML=`<div class="summary"><h3>Madame Esmeralda’s Final Words</h3>${P.map(p=>`<p>${p}</p>`).join("")}</div>`;
   if(talk){
-    setTimeout(()=>{ say(P[P.length-1],{voice:false}); },6500);
+    setTimeout(()=>{ say(P[P.length-1],false); },6500);
   }
 }
 
@@ -879,7 +937,7 @@ async function turnAll(){
   busy=true; $("turnAllBtn").classList.add("hidden");
   for(let i=0;i<reading.cards.length;i++){ if(!reading.revealed.includes(i)){ reveal(i,false); await wait(260);} }
   busy=false;
-  say("There — all your cards are turned. Read my words below, and touch any card to look at it more closely.");
+  say("There — all your cards are turned. Read my words below, and touch any card to look at it more closely.",["turnall"]);
   $("readingLog").scrollIntoView({behavior:"smooth"});
 }
 
@@ -888,7 +946,7 @@ function newReading(){
   $("emptyMsg").classList.remove("hidden"); $("turnAllBtn").classList.add("hidden");
   $("readingLog").classList.remove("show"); $("readingLog").innerHTML=""; $("question").value="";
   window.scrollTo({top:0,behavior:"smooth"});
-  say(pick(GREET));
+  {const k=pickI(GREET); say(GREET[k],["greet:"+k]);}
 }
 
 function showSaved(r){
@@ -903,7 +961,7 @@ function showSaved(r){
   const s=soundOn; soundOn=false;
   sp.pos.forEach((p,i)=>reveal(i,false));
   soundOn=s;
-  say("Here is the reading you saved. Touch any card to look at it again.");
+  say("Here is the reading you saved. Touch any card to look at it again.",["saved"]);
 }
 
 /* =====================================================================
@@ -985,7 +1043,7 @@ function updateToggles(){
   $("soundBtn").textContent=soundOn?"♪ Sounds: On":"♪ Sounds: Off"; $("soundBtn").classList.toggle("on",soundOn);
   try{ localStorage.setItem("tm_voice",voiceOn?"1":"0"); localStorage.setItem("tm_sound",soundOn?"1":"0"); }catch(e){}
 }
-$("voiceBtn").onclick=()=>{ voiceOn=!voiceOn; updateToggles(); if(voiceOn) speak($("speech").innerHTML); else if("speechSynthesis" in window) speechSynthesis.cancel(); };
+$("voiceBtn").onclick=()=>{ voiceOn=!voiceOn; updateToggles(); if(voiceOn) speak(lastSaid.html||$("speech").innerHTML,lastSaid.keys); else stopVoice(); };
 $("soundBtn").onclick=()=>{ soundOn=!soundOn; updateToggles(); };
 $("dealBtn").onclick=deal;
 $("turnAllBtn").onclick=turnAll;
@@ -997,8 +1055,9 @@ window.addEventListener("resize",layoutTable);
   const useSvg=()=>{ im.remove(); $("portrait").insertAdjacentHTML("beforeend",READER_SVG); };
   if(im.complete && !im.naturalWidth) useSvg(); else im.onerror=useSvg;
 })();
+if("speechSynthesis" in window){ setupVoices(); speechSynthesis.onvoiceschanged=setupVoices; } else setupVoices();
 renderSpreadButtons(); updateToggles(); checkImages();
-say(pick(GREET),{voice:false});
+{const k=pickI(GREET); say(GREET[k],false); lastSaid={html:GREET[k],keys:["greet:"+k]};}
 </script>
 </body>
 </html>
