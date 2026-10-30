@@ -29,12 +29,12 @@ body {
   font-size: 6.25rem;
 }
 .display-2 {
-  font-family: 'Merienda', handwriting;
-  font-size: 4rem;
+  font-family: 'Ancient-Tulip';
+  font-size: 2rem;
   line-height: 1;
 }
 .display-2 > .mbr-iconfont {
-  font-size: 5rem;
+  font-size: 2.5rem;
 }
 .display-4 {
   font-family: 'Merienda', handwriting;
@@ -77,9 +77,9 @@ body {
     line-height: calc( 1.1 * (2.4rem + (5 - 2.4) * ((100vw - 20rem) / (48 - 20))));
   }
   .display-2 {
-    font-size: 3.2rem;
-    font-size: calc( 2.05rem + (4 - 2.05) * ((100vw - 20rem) / (48 - 20)));
-    line-height: calc( 1.3 * (2.05rem + (4 - 2.05) * ((100vw - 20rem) / (48 - 20))));
+    font-size: 1.6rem;
+    font-size: calc( 1.35rem + (2 - 1.35) * ((100vw - 20rem) / (48 - 20)));
+    line-height: calc( 1.3 * (1.35rem + (2 - 1.35) * ((100vw - 20rem) / (48 - 20))));
   }
   .display-4 {
     font-size: 0.96rem;
@@ -104,9 +104,9 @@ body {
     line-height: calc( 1.1 * (2.4rem + (5 - 2.4) * ((100vw - 62rem) / (87 - 62))));
   }
   .display-2 {
-    font-size: 3.2rem;
-    font-size: calc( 2.05rem + (4 - 2.05) * ((100vw - 62rem) / (87 - 62)));
-    line-height: calc( 1.3 * (2.05rem + (4 - 2.05) * ((100vw - 62rem) / (87 - 62))));
+    font-size: 1.6rem;
+    font-size: calc( 1.35rem + (2 - 1.35) * ((100vw - 62rem) / (87 - 62)));
+    line-height: calc( 1.3 * (1.35rem + (2 - 1.35) * ((100vw - 62rem) / (87 - 62))));
   }
   .display-4 {
     font-size: 0.96rem;
@@ -5560,7 +5560,7 @@ a {
   background: #edefeb;
 }
 .cid-vx3lvliHCo .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vx3lvliHCo .mbr-text,
 .cid-vx3lvliHCo .mbr-section-btn {
@@ -7219,7 +7219,7 @@ a {
   background: #edefeb;
 }
 .cid-vxnCHNHCzd .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vxnCHNHCzd .mbr-text,
 .cid-vxnCHNHCzd .mbr-section-btn {
@@ -9778,7 +9778,7 @@ a {
   background: #edefeb;
 }
 .cid-vy3vMFMu8K .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vy3vMFMu8K .mbr-text,
 .cid-vy3vMFMu8K .mbr-section-btn {
@@ -10622,7 +10622,7 @@ a {
   background: #edefeb;
 }
 .cid-vzc2sD82cg .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzc2sD82cg .mbr-text,
 .cid-vzc2sD82cg .mbr-section-btn {
@@ -12459,7 +12459,7 @@ a {
   background: #edefeb;
 }
 .cid-vzip8q7Y1K .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzip8q7Y1K .mbr-text,
 .cid-vzip8q7Y1K .mbr-section-btn {
@@ -13209,7 +13209,7 @@ a {
   background: #edefeb;
 }
 .cid-vzjr110eb2 .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzjr110eb2 .mbr-text,
 .cid-vzjr110eb2 .mbr-section-btn {
@@ -13959,7 +13959,7 @@ a {
   background: #edefeb;
 }
 .cid-vzjrD8ieAf .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzjrD8ieAf .mbr-text,
 .cid-vzjrD8ieAf .mbr-section-btn {
@@ -14709,7 +14709,7 @@ a {
   background: #edefeb;
 }
 .cid-vzjskh6vRK .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzjskh6vRK .mbr-text,
 .cid-vzjskh6vRK .mbr-section-btn {
@@ -15459,7 +15459,7 @@ a {
   background: #edefeb;
 }
 .cid-vzjsPXAgdc .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzjsPXAgdc .mbr-text,
 .cid-vzjsPXAgdc .mbr-section-btn {
@@ -16209,7 +16209,7 @@ a {
   background: #edefeb;
 }
 .cid-vzjtkDaXWk .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzjtkDaXWk .mbr-text,
 .cid-vzjtkDaXWk .mbr-section-btn {
@@ -16959,7 +16959,7 @@ a {
   background: #edefeb;
 }
 .cid-vzjtKGkqBT .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzjtKGkqBT .mbr-text,
 .cid-vzjtKGkqBT .mbr-section-btn {
@@ -17709,7 +17709,7 @@ a {
   background: #edefeb;
 }
 .cid-vzjutUF4jg .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzjutUF4jg .mbr-text,
 .cid-vzjutUF4jg .mbr-section-btn {
@@ -18459,7 +18459,7 @@ a {
   background: #edefeb;
 }
 .cid-vzt5JHz8wY .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vzt5JHz8wY .mbr-text,
 .cid-vzt5JHz8wY .mbr-section-btn {
@@ -19303,7 +19303,7 @@ a {
   background: #edefeb;
 }
 .cid-vztGGq0vzz .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vztGGq0vzz .mbr-text,
 .cid-vztGGq0vzz .mbr-section-btn {
@@ -20053,7 +20053,7 @@ a {
   background: #edefeb;
 }
 .cid-vztVHWWDIB .mbr-section-title {
-  color: #ffffff;
+  color: #e0a92a;
 }
 .cid-vztVHWWDIB .mbr-text,
 .cid-vztVHWWDIB .mbr-section-btn {
