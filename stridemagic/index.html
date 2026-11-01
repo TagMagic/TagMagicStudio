@@ -29,7 +29,12 @@ body::before{content:"";position:fixed;inset:0;background:linear-gradient(180deg
 .app{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:10px 16px 28px}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:6px}
-.brand img.wiz{height:84px;width:84px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
+.brand img.wiz{height:84px;width:84px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));transform-origin:50% 85%;animation:wizFloat 3.6s ease-in-out infinite}
+@keyframes wizFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+@keyframes wizGlow{0%,100%{filter:drop-shadow(0 4px 8px rgba(0,0,0,.6)) drop-shadow(0 0 0 rgba(255,140,40,0))}50%{filter:drop-shadow(0 4px 8px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(255,140,40,.55))}}
+.brand img.wiz{animation:wizFloat 3.6s ease-in-out infinite,wizGlow 3.6s ease-in-out infinite}
+.prehead img.wz{transform-origin:50% 85%;animation:wizFloat 3.6s ease-in-out infinite,wizGlow 3.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.brand img.wiz,.prehead img.wz{animation:none}}
 .brand img.logo{height:70px;max-width:60vw;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
 .brand .logotext{font-family:Limelight,serif;font-size:42px;color:var(--gold2);text-shadow:0 3px 0 #6b4a10,0 6px 14px rgba(0,0,0,.6)}
 @media (max-width:640px){.brand img.wiz{height:60px;width:60px}.brand img.logo{height:52px}}
