@@ -1,7 +1,7 @@
 /* TargetMagic offline support.
    Online: always fetches the newest files and keeps a copy.
    Offline: serves the copy saved on the last visit. */
-const CACHE = 'targetmagic-v1';
+const CACHE = 'targetmagic-v2';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (event) => {
