@@ -450,6 +450,8 @@ const tiny = document.createElement('canvas'), tinyCtx = tiny.getContext('2d');
 const layer = document.createElement('canvas'), layerCtx = layer.getContext('2d');
 const personC = document.createElement('canvas'), personCtx = personC.getContext('2d');
 const silhouette = document.createElement('canvas');
+const mid = document.createElement('canvas'), midCtx = mid.getContext('2d');
+const canBlur = (() => { try { const t = document.createElement('canvas').getContext('2d'); t.filter = 'blur(2px)'; return t.filter === 'blur(2px)'; } catch(e){ return false; } })();
 
 function sizeCanvas(w,h){
   const s = Math.min(1, 900/Math.max(w,h));
@@ -461,13 +463,30 @@ function sizeCanvas(w,h){
 function drawSilhouette(){
   silhouette.width = 240; silhouette.height = Math.round(240*H/W);
   const c = silhouette.getContext('2d'), sw = silhouette.width, sh = silhouette.height;
+  // Keep a natural head-and-shoulders shape whatever the frame size
+  const u = Math.min(sw*0.84, sh*0.66);     // body scale
+  const cx = sw/2, top = sh - u*1.25;       // anchor figure to the bottom of the frame
+  const X = dx => cx + dx*u, Y = y => top + y*u*1.25;
+  // Right half of the figure, from crown of the head down to the bottom (bezier segments)
+  const seg = [
+    [[0.085,0.150],[0.140,0.190],[0.140,0.275]],   // crown to temple
+    [[0.158,0.290],[0.160,0.345],[0.137,0.360]],   // ear
+    [[0.128,0.405],[0.100,0.440],[0.072,0.452]],   // jaw
+    [[0.066,0.480],[0.068,0.505],[0.078,0.525]],   // neck
+    [[0.120,0.560],[0.250,0.575],[0.330,0.600]],   // slope of the shoulder
+    [[0.400,0.620],[0.430,0.670],[0.437,0.740]],   // shoulder cap
+    [[0.442,0.820],[0.447,0.920],[0.452,1.020]]    // arm to bottom
+  ];
+  const start = [0,0.150];
   c.clearRect(0,0,sw,sh); c.fillStyle = '#fff';
-  const cx = sw/2, headR = sw*0.15, headY = sh*0.38;
-  c.beginPath(); c.ellipse(cx, headY, headR*0.85, headR*1.08, 0, 0, Math.PI*2); c.fill();
-  c.fillRect(cx-headR*0.35, headY+headR*0.8, headR*0.7, headR*0.7);
-  c.beginPath();
-  c.moveTo(cx-sw*0.40, sh); c.quadraticCurveTo(cx-sw*0.38, headY+headR*1.65, cx-headR*0.3, headY+headR*1.35);
-  c.lineTo(cx+headR*0.3, headY+headR*1.35); c.quadraticCurveTo(cx+sw*0.38, headY+headR*1.65, cx+sw*0.40, sh);
+  c.beginPath(); c.moveTo(X(start[0]), Y(start[1]));
+  seg.forEach(([a,b,e]) => c.bezierCurveTo(X(a[0]),Y(a[1]),X(b[0]),Y(b[1]),X(e[0]),Y(e[1])));
+  c.lineTo(X(-0.452), Y(1.02));
+  // Left half: the same curves mirrored, walked back up to the crown
+  for (let i = seg.length-1; i >= 0; i--){
+    const [a,b] = seg[i], prev = i ? seg[i-1][2] : start;
+    c.bezierCurveTo(X(-b[0]),Y(b[1]),X(-a[0]),Y(a[1]),X(-prev[0]),Y(prev[1]));
+  }
   c.closePath(); c.fill();
 }
 sizeCanvas(720,900);
@@ -607,7 +626,17 @@ function auraLayer(mask, res, scale, c1, c2, alpha, t, lift){
   layerCtx.globalCompositeOperation = 'source-over';
   layerCtx.clearRect(0,0,W,H);
   layerCtx.imageSmoothingEnabled = true; layerCtx.imageSmoothingQuality = 'high';
-  layerCtx.drawImage(tiny,0,0,W,H);
+  if (canBlur){
+    layerCtx.filter = 'blur(' + Math.round(W/rw*0.9) + 'px)';
+    layerCtx.drawImage(tiny,0,0,W,H);
+    layerCtx.filter = 'none';
+  } else {
+    // two-step enlarge for a smoother glow on browsers without canvas blur
+    mid.width = rw*4; mid.height = rh*4;
+    midCtx.imageSmoothingEnabled = true; midCtx.imageSmoothingQuality = 'high';
+    midCtx.drawImage(tiny,0,0,mid.width,mid.height);
+    layerCtx.drawImage(mid,0,0,W,H);
+  }
   layerCtx.globalCompositeOperation = 'source-in';
   const ang = t*0.35, cx = W/2, cy = H/2, R = Math.max(W,H)*0.7;
   const g = layerCtx.createLinearGradient(cx+Math.cos(ang)*R, cy+Math.sin(ang)*R, cx-Math.cos(ang)*R, cy-Math.sin(ang)*R);
@@ -642,9 +671,9 @@ function frame(now){
   const pulse = 1 + Math.sin(t*1.6)*0.035;
 
   // Aura layers: outer accent, middle second color, inner main color
-  auraLayer(mask, 12, 1.75*pulse, auraCols.c, auraCols.b, 0.55, t, 0.05);
-  auraLayer(mask, 20, 1.38*pulse, auraCols.b, auraCols.a, 0.55, t+2, 0.04);
-  auraLayer(mask, 34, 1.12*(2-pulse), auraCols.a, auraCols.a2||auraCols.a, 0.6, t+4, 0.02);
+  auraLayer(mask, 20, 1.75*pulse, auraCols.c, auraCols.b, 0.55, t, 0.05);
+  auraLayer(mask, 32, 1.38*pulse, auraCols.b, auraCols.a, 0.55, t+2, 0.04);
+  auraLayer(mask, 56, 1.12*(2-pulse), auraCols.a, auraCols.a2||auraCols.a, 0.6, t+4, 0.02);
 
   // Sparkles
   ctx.globalCompositeOperation = 'lighter';
