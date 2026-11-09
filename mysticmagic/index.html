@@ -190,7 +190,7 @@ footer{text-align:center;padding:8px 10px 14px;font-family:'IM Fell English SC',
 }
 @media print{
   body{background:#fff}
-  body::before,.bgimg,.haze,#fx,header,main,footer,.cardbtns{display:none!important}
+  body::before,.bgimg,.haze,#fx,#fogfront,header,main,footer,.cardbtns{display:none!important}
   .modal{position:static;display:flex!important;background:#fff}
   .fcard{box-shadow:none;max-height:none;animation:none}
 }
@@ -198,7 +198,6 @@ footer{text-align:center;padding:8px 10px 14px;font-family:'IM Fell English SC',
 </head>
 <body>
 <div class="bgimg"><video id="bgvid" muted loop playsinline autoplay preload="auto"></video></div>
-<div class="haze"></div>
 <canvas id="fx"></canvas>
 
 <header>
@@ -600,9 +599,6 @@ const FX={boost:0};
   const R=(a,b)=>a+Math.random()*(b-a);
   const stars=[[1028,320],[237,67],[562,164],[637,309],[677,98],[1622,65],[827,337],[1169,282],[1292,80],[422,108],[1163,394],[1707,238],[1115,49],[880,122],[939,26],[49,23],[743,228],[705,413],[1755,30],[543,51],[1072,194],[1197,158],[916,403],[1794,138],[191,213],[1387,22],[533,272]].map(([x,y])=>({x,y,p:R(0,6.28),sp:R(.6,1.8),sz:R(3,6)}));
   const bulbs=[[3,279],[28,291],[55,302],[4,301],[82,314],[107,325],[131,334],[152,343],[171,352],[190,360],[151,360],[208,367],[166,366],[228,376],[247,384],[262,390],[276,397],[290,403],[305,408],[318,414],[331,419],[341,424],[352,428],[364,434],[507,435],[378,439],[519,441],[484,443],[391,445],[466,448],[530,448],[403,450],[450,450],[428,450],[612,452],[542,453],[414,455],[597,454],[119,459],[556,457],[570,458],[584,457],[3,461],[425,460],[627,462],[87,466],[693,463],[434,464],[161,467],[679,466],[443,467],[638,468],[139,472],[21,472],[672,469],[451,470],[650,471],[662,471],[66,474],[610,470],[697,472],[45,475],[459,474],[466,477],[177,479],[701,478],[474,480],[723,482],[482,483],[709,484],[490,487],[216,490],[188,491],[228,489],[498,490],[203,494],[506,493],[515,497],[236,501],[246,510],[289,511],[34,511],[261,516],[274,515],[326,568],[325,591],[324,610]].map(([x,y])=>({x,y,g:Math.floor(x/26),tw:R(0,6.28)}));
-  const motes=[]; function mote(init){ return {x:R(0,VW),y:init?R(560,1080):R(1000,1100),vy:R(10,26),vx:R(-6,6),
-    sz:R(1.2,3),life:0,max:R(5,11),hue:Math.random()<.8?R(35,50):R(270,300),w:R(0,6.28)}; }
-  for(let i=0;i<46;i++) motes.push(mote(true));
   let shoot=null, nextShoot=performance.now()+R(3000,8000), last=performance.now();
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function glint(x,y,r,a){
@@ -634,15 +630,6 @@ const FX={boost:0};
       const g=ctx.createLinearGradient(x,y,x2,y2); g.addColorStop(0,`rgba(255,250,230,${a})`); g.addColorStop(1,'rgba(255,240,200,0)');
       ctx.strokeStyle=g; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x2,y2); ctx.stroke();
       if(shoot.life>1.1){ shoot=null; nextShoot=now+R(7000,15000); } }
-    const n = reduce?0:motes.length;
-    for(let i=0;i<n;i++){ const m=motes[i]; m.life+=dt;
-      m.y-=m.vy*dt*(1+FX.boost*.8); m.x+=(m.vx+Math.sin(t*.8+m.w)*8)*dt;
-      if(m.life>m.max||m.y<380){ motes[i]=mote(false); continue; }
-      const fa=Math.min(1,m.life/1.2)*Math.min(1,(m.max-m.life)/1.5);
-      const [x,y]=map(m.x,m.y), r=m.sz*sc*1.1+.5;
-      const hue = FX.boost>.5 && i%2 ? 285 : m.hue;
-      const g=ctx.createRadialGradient(x,y,0,x,y,r*3); g.addColorStop(0,`hsla(${hue},100%,80%,${.75*fa})`); g.addColorStop(1,`hsla(${hue},100%,60%,0)`);
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r*3,0,6.283); ctx.fill(); }
     ctx.globalCompositeOperation='source-over';
     requestAnimationFrame(frame);
   }
