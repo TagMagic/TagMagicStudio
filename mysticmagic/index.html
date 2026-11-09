@@ -597,7 +597,8 @@ const FX={boost:0};
   size(); addEventListener('resize',size);
   const map=(x,y)=>[ox+x*sc, oy+y*sc];
   const R=(a,b)=>a+Math.random()*(b-a);
-  const stars=[...Array(38)].map(()=>({x:R(0,VW),y:R(0,250),p:R(0,6.28),sp:R(.6,1.8),sz:R(3,7)}));
+  const stars=[[1028,320],[237,67],[562,164],[637,309],[677,98],[1622,65],[827,337],[1169,282],[1292,80],[422,108],[1163,394],[1707,238],[1115,49],[880,122],[939,26],[49,23],[743,228],[705,413],[1755,30],[543,51],[1072,194],[1197,158],[916,403],[1794,138],[191,213],[1387,22],[533,272]].map(([x,y])=>({x,y,p:R(0,6.28),sp:R(.6,1.8),sz:R(3,6)}));
+  const bulbs=[[3,279],[28,291],[55,302],[4,301],[82,314],[107,325],[131,334],[152,343],[171,352],[190,360],[151,360],[208,367],[166,366],[228,376],[247,384],[262,390],[276,397],[290,403],[305,408],[318,414],[331,419],[341,424],[352,428],[364,434],[507,435],[378,439],[519,441],[484,443],[391,445],[466,448],[530,448],[403,450],[450,450],[428,450],[612,452],[542,453],[414,455],[597,454],[119,459],[556,457],[570,458],[584,457],[3,461],[425,460],[627,462],[87,466],[693,463],[434,464],[161,467],[679,466],[443,467],[638,468],[139,472],[21,472],[672,469],[451,470],[650,471],[662,471],[66,474],[610,470],[697,472],[45,475],[459,474],[466,477],[177,479],[701,478],[474,480],[723,482],[482,483],[709,484],[490,487],[216,490],[188,491],[228,489],[498,490],[203,494],[506,493],[515,497],[236,501],[246,510],[289,511],[34,511],[261,516],[274,515],[326,568],[325,591],[324,610]].map(([x,y])=>({x,y,g:Math.floor(x/26),tw:R(0,6.28)}));
   const motes=[]; function mote(init){ return {x:R(0,VW),y:init?R(560,1080):R(1000,1100),vy:R(10,26),vx:R(-6,6),
     sz:R(1.2,3),life:0,max:R(5,11),hue:Math.random()<.8?R(35,50):R(270,300),w:R(0,6.28)}; }
   for(let i=0;i<46;i++) motes.push(mote(true));
@@ -613,6 +614,17 @@ const FX={boost:0};
     const dt=Math.min(.05,(now-last)/1000); last=now;
     ctx.clearRect(0,0,W,H); ctx.globalCompositeOperation='lighter';
     const t=now/1000;
+    // balloon booth bulbs: chasing marquee pattern with a little twinkle
+    const step=Math.floor(t*4.5), mode=Math.floor(t/7)%2;
+    bulbs.forEach(b=>{
+      const [x,y]=map(b.x,b.y), r=10*sc+1;
+      const on = mode===0 ? ((b.g+step)%3!==0) : (Math.sin(t*5+b.tw*3)>-0.2);
+      if(on){ const g=ctx.createRadialGradient(x,y,0,x,y,r*1.7); g.addColorStop(0,'rgba(255,245,200,.55)'); g.addColorStop(1,'rgba(255,190,80,0)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r*1.7,0,6.283); ctx.fill(); }
+      else { ctx.globalCompositeOperation='source-over';
+        const g=ctx.createRadialGradient(x,y,0,x,y,r*1.15); g.addColorStop(0,'rgba(60,22,6,.78)'); g.addColorStop(.6,'rgba(60,22,6,.45)'); g.addColorStop(1,'rgba(60,22,6,0)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r*1.15,0,6.283); ctx.fill(); ctx.globalCompositeOperation='lighter'; }
+    });
     stars.forEach(s=>{ const tw=Math.pow(Math.max(0,Math.sin(t*s.sp+s.p)),6); if(tw<.02) return;
       const [x,y]=map(s.x,s.y); glint(x,y,s.sz*sc*.55+.6,tw*.85); });
     if(!reduce && now>nextShoot && !shoot){ shoot={x:R(150,1100),y:R(20,140),vx:R(700,950),vy:R(140,260),life:0}; }
