@@ -613,16 +613,11 @@ const FX={boost:0};
     const dt=Math.min(.05,(now-last)/1000); last=now;
     ctx.clearRect(0,0,W,H); ctx.globalCompositeOperation='lighter';
     const t=now/1000;
-    // balloon booth bulbs: chasing marquee pattern with a little twinkle
-    const step=Math.floor(t*4.5), mode=Math.floor(t/7)%2;
+    // balloon booth bulbs: steady warm glow, like regular light bulbs
     bulbs.forEach(b=>{
       const [x,y]=map(b.x,b.y), r=10*sc+1;
-      const on = mode===0 ? ((b.g+step)%3!==0) : (Math.sin(t*5+b.tw*3)>-0.2);
-      if(on){ const g=ctx.createRadialGradient(x,y,0,x,y,r*1.7); g.addColorStop(0,'rgba(255,245,200,.55)'); g.addColorStop(1,'rgba(255,190,80,0)');
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r*1.7,0,6.283); ctx.fill(); }
-      else { ctx.globalCompositeOperation='source-over';
-        const g=ctx.createRadialGradient(x,y,0,x,y,r*1.15); g.addColorStop(0,'rgba(60,22,6,.78)'); g.addColorStop(.6,'rgba(60,22,6,.45)'); g.addColorStop(1,'rgba(60,22,6,0)');
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r*1.15,0,6.283); ctx.fill(); ctx.globalCompositeOperation='lighter'; }
+      const g=ctx.createRadialGradient(x,y,0,x,y,r*1.6); g.addColorStop(0,'rgba(255,240,190,.32)'); g.addColorStop(1,'rgba(255,190,80,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r*1.6,0,6.283); ctx.fill();
     });
     stars.forEach(s=>{ const tw=Math.pow(Math.max(0,Math.sin(t*s.sp+s.p)),6); if(tw<.02) return;
       const [x,y]=map(s.x,s.y); glint(x,y,s.sz*sc*.55+.6,tw*.85); });
