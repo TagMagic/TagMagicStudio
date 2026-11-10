@@ -109,7 +109,7 @@
       <p>Shoot the moving targets and ducks across the gallery.<br>
       Swinging targets <b>50</b> • Spinning clowns <b>60</b> • Flip targets <b>40</b><br>
       Top ducks <b>20</b> • Bottom ducks <b>10</b> • Golden duck <b>100</b></p>
-      <p>10 shots a round. Hit the goal to move on. 3 rounds in all.<br>
+      <p>10 shots a round. Round 1 needs 6 hits, Round 2 needs 7, Round 3 needs 8. 3 rounds in all.<br>
       Watch out, the rifle sways. Steady hands win prizes!</p>
       <button id="startBtn">Play</button>
     </div>
@@ -190,16 +190,16 @@ const BK = { h: 880 }; BK.w = BK.h * 900 / 1350; BK.x = 6; BK.y = H - BK.h - 12;
 
 // ---------- Rounds ----------
 const ROUNDS = [
-  { speeds: [120, -150, 180], sway: 10, goal: 180, bob: 0,  reverse: false, gold: .07, duckH: 80, swingA: .55, swingW: 1.9, swingV: 60 },
-  { speeds: [170, -205, 240], sway: 13, goal: 230, bob: 10, reverse: false, gold: .08, duckH: 77, swingA: .70, swingW: 2.3, swingV: -95 },
-  { speeds: [220, -260, 300], sway: 16, goal: 280, bob: 14, reverse: true,  gold: .10, duckH: 74, swingA: .85, swingW: 2.7, swingV: 130 },
+  { speeds: [120, -150, 180], sway: 10, goal: 6, bob: 0,  reverse: false, gold: .07, duckH: 80, swingA: .55, swingW: 1.9, swingV: 60 },
+  { speeds: [170, -205, 240], sway: 13, goal: 7, bob: 10, reverse: false, gold: .08, duckH: 77, swingA: .70, swingW: 2.3, swingV: -95 },
+  { speeds: [220, -260, 300], sway: 16, goal: 8, bob: 14, reverse: true,  gold: .10, duckH: 74, swingA: .85, swingW: 2.7, swingV: 130 },
 ];
 const SHOTS = 10;
 
 // ---------- State ----------
 const S = {
   mode: 'title',   // title | intro | play | between | over
-  round: 0, score: 0, roundPts: 0, shots: SHOTS,
+  round: 0, score: 0, roundPts: 0, roundHits: 0, shots: SHOTS,
   ducks: [], flips: [], swings: [], holes: [], pops: [], sparks: [],
   railDir: [1, 1, 1], nextRev: [0, 0, 0],
   banner: null, lastShot: -9, recoil: 0,
@@ -388,7 +388,7 @@ function setupRound() {
   S.swings = [];
   for (let i = 0; i < 3; i++) S.swings.push({ x: WALL.x1 - 100 + (i + .5) * span / 3, phase: i * 2.1 + Math.random(), hit: false, spin: 0 });
   S.holes = []; S.pops = []; S.sparks = [];
-  S.shots = SHOTS; S.roundPts = 0;
+  S.shots = SHOTS; S.roundPts = 0; S.roundHits = 0;
 }
 function startGame() {
   audioInit(); if (AC.state === 'suspended') AC.resume();
@@ -404,17 +404,17 @@ function beginRound() {
   if (S.mode === 'over') return;
   setupRound();
   S.mode = 'play';
-  S.banner = { text: 'Round ' + (S.round + 1), sub: 'Goal: ' + ROUNDS[S.round].goal + ' points', t: 0, dur: 2.6 };
+  S.banner = { text: 'Round ' + (S.round + 1), sub: 'Goal: ' + ROUNDS[S.round].goal + ' hits out of ' + SHOTS + ' shots', t: 0, dur: 2.6 };
   sfxBell(2);
   say('r' + (S.round + 1), 3);
 }
 function endRound() {
   const R = ROUNDS[S.round];
   S.mode = 'between';
-  if (S.roundPts >= R.goal) {
+  if (S.roundHits >= R.goal) {
     if (S.round === ROUNDS.length - 1) return finish(true);
     sfxFanfare(); celebrate(3);
-    S.banner = { text: 'Round Cleared!', sub: S.roundPts + ' / ' + R.goal + ' points', t: 0, dur: 99 };
+    S.banner = { text: 'Round Cleared!', sub: S.roundHits + ' of ' + SHOTS + ' hits  •  +' + S.roundPts + ' points', t: 0, dur: 99 };
     say('pass', 3);
     setTimeout(() => { S.round++; beginRound(); }, 3800);
   } else finish(false);
@@ -429,7 +429,7 @@ function finish(won) {
     document.getElementById('endScore').textContent = 'Final Score: ' + S.score;
     document.getElementById('endMsg').innerHTML = won
       ? 'All 3 rounds cleared. Pick any prize you want, sharpshooter!<br>High Score: ' + S.high
-      : 'You made it to Round ' + (S.round + 1) + ' (' + S.roundPts + ' of ' + ROUNDS[S.round].goal + ' points).<br>High Score: ' + S.high;
+      : 'You made it to Round ' + (S.round + 1) + ' (' + S.roundHits + ' hits, needed ' + ROUNDS[S.round].goal + ').<br>High Score: ' + S.high;
     const form = document.getElementById('saveForm');
     form.classList.toggle('hidden', S.score <= 0);
     document.getElementById('endBoardWrap').classList.add('hidden');
@@ -655,7 +655,7 @@ function fire() {
 }
 function celebrate(sec) { S.signFlash = Math.max(S.signFlash, sec); }
 function addPoints(p, x, y, color, label) {
-  S.score += p; S.roundPts += p;
+  S.score += p; S.roundPts += p; S.roundHits++;
   S.pops.push({ x, y, text: label ? label + ' +' + p : '+' + p, color, t: 0 });
 }
 function burst(x, y, n, gold) {
@@ -970,7 +970,7 @@ function drawHUD() {
     }
   }
   const rN = S.mode === 'title' ? 1 : S.round + 1;
-  pnl(PANELS[1], 'ROUND ' + rN + ' OF 3  •  POINTS', (S.mode === 'title' ? 0 : S.roundPts) + ' / ' + R.goal);
+  pnl(PANELS[1], 'ROUND ' + rN + ' OF 3  •  HITS', (S.mode === 'title' ? 0 : S.roundHits) + ' / ' + R.goal);
   pnl(PANELS[2], 'SCORE  •  HIGH ' + S.high, String(S.score));
 }
 function drawBarker() {
