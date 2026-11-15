@@ -155,10 +155,11 @@ label.chk{font-size:14px;display:flex;gap:6px;align-items:center;color:#e9cf9a !
   <h4>Moving your checkers</h4>
   <ul>
     <li>You play the <b>ivory</b> checkers. Move them around the board toward your home board at the bottom right (points 1 to 6).</li>
-    <li>Click a checker, then click where it should go. Or drag it there.</li>
-    <li>Gold rings show every spot the selected checker can move to.</li>
-    <li>Double-click a checker to move it with one die automatically.</li>
-    <li>Bear off by moving a checker to the tray on the right.</li>
+    <li><b>One click</b> moves a checker by your larger die.</li>
+    <li><b>Right-click</b> moves it by your smaller die instead.</li>
+    <li>To put a checker on any other spot, <b>drag</b> it there. While you hold it, gold rings show every spot it can reach, including moves that use both dice.</li>
+    <li>If the larger die can't be used for that checker, one click uses the die that works.</li>
+    <li>Bear off by clicking a checker in your home board, or dragging it to the tray on the right.</li>
   </ul>
   <h4>Your turn</h4>
   <ul>
@@ -371,7 +372,7 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 var $=function(id){return document.getElementById(id);};
 
 // ================= geometry =================
-var BX=124,BY=143,BS=1200/1536; // board placement in table space
+var BX=124,BY=124,BS=1200/1536; // board placement in table space
 var LX=[236,323.6,411.2,498.8,586.4,674],RX=[863,951,1039,1127,1215,1303];
 var CK=80; // checker diameter (board px)
 var BAR_X=768,TRAY_X=1426;
@@ -813,7 +814,7 @@ cv.addEventListener('pointerdown',function(e){
   if(S.dests&&idx in S.dests){ moveTo(idx); return; }
   if(idx>=1&&idx<=25&&S.H[idx]>0){
     if(S.H[25]>0&&idx!==25){ status('You must bring your checker in from the bar first.'); return; }
-    if(selectSrc(idx)){ S.drag={src:idx,x:p.x,y:p.y,sx:p.x,sy:p.y,moved:false}; try{cv.setPointerCapture(e.pointerId);}catch(_){} }
+    if(selectSrc(idx)){ S.drag={src:idx,x:p.x,y:p.y,sx:p.x,sy:p.y,moved:false,btn:e.button}; try{cv.setPointerCapture(e.pointerId);}catch(_){} }
     else status('That checker can’t move with these dice.');
     updateSide(); return;
   }
@@ -821,11 +822,15 @@ cv.addEventListener('pointerdown',function(e){
 });
 cv.addEventListener('pointermove',function(e){ if(!S.drag) return; var p=evtBoard(e); S.drag.x=p.x; S.drag.y=p.y; if(Math.abs(p.x-S.drag.sx)+Math.abs(p.y-S.drag.sy)>14) S.drag.moved=true; });
 cv.addEventListener('pointerup',function(e){ if(!S.drag) return; var d=S.drag; S.drag=null;
-  if(d.moved){ var p=evtBoard(e), idx=hitTest(p.x,p.y); if(S.dests&&idx in S.dests&&idx!==d.src) moveTo(idx); } });
-cv.addEventListener('dblclick',function(e){ // double click: move with the larger usable die / bear off
-  if(S.phase!=='moving'||S.busy||!S.dests) return; var keys=Object.keys(S.dests).map(Number); if(!keys.length) return;
-  if(0 in S.dests){ moveTo(0); return; }
-  var best=keys.filter(function(k){return S.dests[k].length===1;}).sort(function(a,b){return a-b;})[0]; if(best!=null) moveTo(best); });
+  if(d.moved){ var p=evtBoard(e), idx=hitTest(p.x,p.y); if(S.dests&&idx in S.dests&&idx!==d.src) moveTo(idx); return; }
+  oneClick(d.btn===2); });
+cv.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+function oneClick(smaller){ // one click: move the checker by one die (left = larger die, right = smaller die)
+  if(!S.dests) return; var keys=Object.keys(S.dests).map(Number).filter(function(k){return S.dests[k].length===1;});
+  if(!keys.length) return;
+  keys.sort(function(a,b){ return S.dests[b][0].die-S.dests[a][0].die; });
+  moveTo(smaller?keys[keys.length-1]:keys[0]);
+}
 $('rollBtn').onclick=function(){ ac(); humanRoll(); };
 $('doneBtn').onclick=function(){ if(S.phase==='moving'&&noStepsLeft()&&!S.busy) endHumanTurn(); };
 $('undoBtn').onclick=undo;
