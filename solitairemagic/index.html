@@ -106,16 +106,16 @@ footer a{color:#f3d27a !important;text-decoration:none;font-weight:bold;}
 .welcome img:first-child{height:96px;width:auto;}
 .welcome img:last-child{width:260px;max-width:60%;height:auto;filter:drop-shadow(0 2px 3px rgba(60,30,0,.35));}
 #nmIn{font-family:Georgia,serif;font-size:19px;padding:10px 14px;width:270px;border:2px solid #c9a24a;border-radius:8px;
-  background:#4a2511 !important;background-image:linear-gradient(#3d1d0b,#5a2e15) !important;color:#f7ead0 !important;caret-color:#f3d27a;outline:none;
+  background:#120c06 !important;background-image:linear-gradient(#0e0804,#2a1b0c) !important;color:#f6e7c1 !important;caret-color:#f3d27a;outline:none;
   box-shadow:inset 0 2px 5px rgba(0,0,0,.5);}
-#nmIn::placeholder{color:#cdb48a !important;opacity:1;}
+#nmIn::placeholder{color:#b89c63 !important;opacity:1;}
 #nmIn:focus{border-color:#f3d27a;}
 .btn.choc{color:#f7ead0 !important;background:#4a2511 !important;background-image:linear-gradient(#7a4422,#4a2511) !important;border-color:#c9a24a;font-size:16px;padding:9px 26px;}
 .btn.choc:hover{background-image:linear-gradient(#8c5129,#5a2e15) !important;}
 .pop .wimg{display:block;height:64px;width:auto;margin:0 auto 12px;}
 .pop .wtitle{font-family:'Limelight','Cinzel',Georgia,serif;font-size:44px;line-height:1.1;text-align:center;margin:2px 0 14px;
   color:#4a2511 !important;letter-spacing:1px;text-shadow:0 1px 0 #f7e6c0,0 0 10px rgba(255,240,205,.95),0 0 3px rgba(255,240,205,.9);}
-.pop .wnote{display:block;height:40px;width:auto;max-width:100%;margin:10px auto 0;}
+.pop .wnote{display:block;height:32px;width:auto;max-width:100%;margin:10px auto 0;}
 .pop table.log{font-size:14px;width:100%;}
 .pop table.log th{font-family:'Cinzel',Georgia,serif;font-size:13px;color:#3a1802 !important;border-bottom:2px solid #b8892b;padding:4px 8px;text-align:left;}
 .pop table.log td{padding:4px 8px;border-bottom:1px solid rgba(120,80,30,.3);text-align:left;font-weight:normal;color:#1a0d03 !important;}
@@ -687,7 +687,7 @@ async function makeWord(txt, font, size, W, H, outline){
   c.shadowColor='rgba(255,242,210,.85)'; c.shadowBlur=size*.22; c.fillStyle='rgba(255,242,210,.6)'; c.fillText(txt,W/2,y);
   c.shadowBlur=0;
   if (outline){ c.lineJoin='round'; c.lineWidth=Math.max(2,size*.05); c.strokeStyle='#f6e2b8'; c.strokeText(txt,W/2,y); }
-  const g=c.createLinearGradient(0,y-size/2,0,y+size/2); g.addColorStop(0,'#7e4726'); g.addColorStop(.55,'#663717'); g.addColorStop(1,'#4f280f');
+  const g=c.createLinearGradient(0,y-size/2,0,y+size/2); g.addColorStop(0,'#3a322c'); g.addColorStop(.55,'#1c1612'); g.addColorStop(1,'#0c0907');
   c.fillStyle=g; c.fillText(txt,W/2,y);
   return cv.toDataURL('image/png');
 }
@@ -703,7 +703,7 @@ function namePopup(){
     ${names.length?`<p style="text-align:center;margin-bottom:6px"><b>Pick your name:</b></p><div class="row" style="margin-top:0">${names.map((n,i)=>`<button class="btn${n===players.current?' gold':''}" data-pi="${i}">${esc(n)}</button>`).join('')}</div><p style="text-align:center;margin:14px 0 6px"><b>Or add a new player:</b></p>`:''}
     <div class="row" style="margin-top:4px"><input id="nmIn" maxlength="20" placeholder="Your name" autocomplete="off"></div>
     <img class="wnote" src="${noteURL}" alt="Enter Your Name \u2022 Save Your Stats">
-    <div class="row"><button class="btn choc" id="nmGo">Sign On</button>${players.current?'<button class="btn" id="nmCancel">Cancel</button>':''}</div>`);
+    <div class="row"><button class="btn" id="nmGo">Sign On</button>${players.current?'<button class="btn gold" id="nmCancel">Cancel</button>':''}</div>`);
   const signOn = name => {
     name = (name||'').trim().replace(/\s+/g,' ').slice(0,20);
     if (!name){ $('nmIn').focus(); return; }
