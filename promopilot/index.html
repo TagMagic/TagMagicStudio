@@ -555,9 +555,8 @@ function renderWorkspace() {
   if (!p) {
     ws.innerHTML = `<div class="panel"><div class="empty">
       <img src="${WIZARD_IMG}" alt="">
-      <h2 class="imgh"><img src="${TAKEOFF_IMG}" alt="Ready for Takeoff" style="width:min(400px,90%)"></h2>
-      <p>Add your first product on the left, and PromoPilot will write plans and posts to promote it.</p>
-      ${settings.key ? '' : '<p><b>First:</b> click <b>⚙️ Settings</b> to add your Claude API key. <a href="#" onclick="openHelp();return false;" style="color:#24467a">How do I get one?</a></p>'}
+      <h2 class="imgh"><img src="${TAKEOFF_IMG}" alt="Ready for Takeoff" style="width:min(290px,80%)"></h2>
+      <p style="font-size:21px;font-weight:700;margin:6px 0 18px;color:#2a1206 !important">PromoPilot will write plans &amp; posts to promote your products</p>
       <button class="btn" onclick="openProductEditor()">➕ Add a Product</button>
     </div></div>`;
     return;
