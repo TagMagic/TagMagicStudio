@@ -276,7 +276,7 @@
 </main>
 
 <footer>
-  Another Free &amp; Fun Experience From • <a href="https://tagmagicstudio.com" target="_blank" rel="noopener">TagMagic Studio</a>
+  PromoPilot By • <a href="https://tagmagicstudio.com" target="_blank" rel="noopener">TagMagic Studio</a>
 </footer>
 
 <!-- Pop-up: product editor -->
@@ -899,7 +899,7 @@ document.querySelectorAll('.overlay').forEach(o => o.addEventListener('mousedown
 document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.overlay.show').forEach(o => o.classList.remove('show')); });
 
 renderAll();
-if (!settings.key && !data.products.length) setTimeout(openHelp, 400);
+if (!load('promopilot_help_seen_v1', false)) { store('promopilot_help_seen_v1', true); setTimeout(openHelp, 400); }
 </script>
 </body>
 </html>
